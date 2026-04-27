@@ -39,7 +39,7 @@ def compute_ward_reward(ward_state: int, action: int, next_ward_state: int) -> f
     reward = delta * 10.0
     if ward_state == 4 and next_ward_state == 4:
         reward -= 30.0
-    if ward_state >= 3 and action == 0:
+    if ward_state >= 3 and action == 1:
         reward -= 25.0
     if ward_state <= 1 and action == 3:
         reward -= 10.0
@@ -86,6 +86,7 @@ class SupervisorAgent:
 
         self.q_table.update(ward_state, action, reward, next_ward_state, False)
         self.total_reward       += reward
+        self.episode_rewards.append(reward)
         self.current_ward_state  = next_ward_state
         self.last_transition     = (ward_state, action, next_ward_state, reward)
 

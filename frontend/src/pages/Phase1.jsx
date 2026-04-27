@@ -22,7 +22,7 @@ const TRIAGE_PROBS = {
 }
 
 const STATE_LABELS  = ['Healthy','At Risk','Unstable','Critical','Emergency']
-const ACTION_LABELS = ['Monitor','Treat','Escalate','Emergency']
+const ACTION_LABELS = ['Monitor','Treat','Escalate','Emergency Response']
 const PROB_COLORS   = ['#4ade80','#a5b4fc','#60a5fa','#fb7185','#c084fc']
 
 const VITAL_COLOR = {

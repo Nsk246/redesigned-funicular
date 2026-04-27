@@ -41,11 +41,15 @@ Return exactly this JSON with no other text:
         messages=[{"role": "user", "content": prompt}]
     )
     raw = message.content[0].text.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    return json.loads(raw.strip())
+    if '```' in raw:
+        raw = __import__('re').sub(r'```(?:json)?\s*', '', raw).replace('```', '').strip()
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        match = __import__('re').search(r'\{[^{}]*\}', raw, __import__('re').DOTALL)
+        if match:
+            return json.loads(match.group())
+        raise
 
 
 def generate_triage_explanation(transition: dict) -> str:

@@ -69,7 +69,7 @@ def compute_reward(state: int, action: int, next_state: int) -> float:
     reward = delta * 10.0
 
     # Stuck in emergency
-    if state == 4 and next_state == 4:
+    if False:  # removed: state == 4 early exit
         reward -= 30.0
 
     # Under-action on critical/emergency
@@ -145,7 +145,7 @@ class TriageAgent:
                 self.state_to_tensor(state).numpy(),
                 action, reward,
                 self.state_to_tensor(next_state).numpy(),
-                next_state == 4
+                False
             )
             self._learn()
             self._decay_epsilon()

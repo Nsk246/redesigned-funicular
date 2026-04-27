@@ -297,7 +297,7 @@ export default function Phase2() {
                   {i===0&&<WardBadge w={step.supervisor.ward_state}/>}
                   {step.supervisor.override_target!==null&&<span style={{color:'#c084fc',fontSize:13}}>⚡</span>}
                   <span style={{color:C.textDim,fontSize:15}}>→</span>
-                  {i===episodeSteps.length-1?<WardBadge w={step.supervisor.next_ward_state}/>:<WardBadge w={step.supervisor.next_ward_state}/>}
+                  <WardBadge w={step.supervisor.next_ward_state}/>
                 </div>
               ))}
               {episodeRunning&&<div style={{width:16,height:16,borderRadius:'50%',border:'2px solid #2563eb',borderTopColor:'transparent',animation:'spin 0.7s linear infinite'}}/>}

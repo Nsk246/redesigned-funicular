@@ -30,8 +30,6 @@ for ep in range(EPISODES):
         action, next_state, reward, _ = agent.step(state)
         ep_reward += reward
         state = next_state
-        if state == 4 and step > 15:
-            break
 
     all_rewards.append(ep_reward)
     agent.episode_rewards.append(ep_reward)

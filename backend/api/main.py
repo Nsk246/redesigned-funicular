@@ -157,7 +157,11 @@ def supervisor_step(body: SupervisorStepInput):
         from agents.supervisor_agent import compute_ward_reward
         actual_next_states = [t["next_state"] for t in triage_results]
         actual_next_ward   = int(patients_to_ward_state(actual_next_states))
-        actual_reward      = compute_ward_reward(sup_result["ward_state"], sup_result["action"], actual_next_ward)
+        actual_reward = compute_ward_reward(sup_result["ward_state"], sup_result["action"], actual_next_ward)
+        # Fix #3: Q-table learns from actual transition, not sampled one
+        supervisor_agent.q_table.update(sup_result["ward_state"], sup_result["action"], actual_reward, actual_next_ward, False)
+        supervisor_agent.total_reward += actual_reward
+        supervisor_agent.episode_rewards.append(actual_reward)
         sup_result["next_ward_state"]       = actual_next_ward
         sup_result["next_ward_state_label"] = ["Calm","Active","Busy","Overloaded","Crisis"][actual_next_ward]
         sup_result["reward"]                = actual_reward
