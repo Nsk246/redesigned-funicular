@@ -1,21 +1,24 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 
 export default function RewardChart({ rewards, title }) {
-  const data = rewards.map((r, i) => ({ step: i + 1, reward: r }))
+  const data = rewards.map((r, i) => ({ step: i+1, reward: parseFloat(r.toFixed(1)) }))
   return (
     <div className="card">
-      <h3 className="text-sm font-semibold text-gray-400 mb-4">{title}</h3>
-      <ResponsiveContainer width="100%" height={160}>
+      <p className="label" style={{marginBottom:16}}>{title}</p>
+      <ResponsiveContainer width="100%" height={180}>
         <LineChart data={data}>
-          <XAxis dataKey="step" tick={{ fontSize: 10, fill: "#6b7280" }} />
-          <YAxis tick={{ fontSize: 10, fill: "#6b7280" }} />
-          <Tooltip
-            contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: "8px" }}
-            labelStyle={{ color: "#9ca3af" }}
-            itemStyle={{ color: "#60a5fa" }}
-          />
-          <ReferenceLine y={0} stroke="#374151" strokeDasharray="3 3" />
-          <Line type="monotone" dataKey="reward" stroke="#3b82f6" strokeWidth={2} dot={false} />
+          <XAxis dataKey="step" tick={{fontSize:11,fill:'#475569',fontFamily:'Inter'}} />
+          <YAxis tick={{fontSize:11,fill:'#475569',fontFamily:'Inter'}} />
+          <Tooltip contentStyle={{background:'#111827',border:'1px solid #1e2d45',borderRadius:'10px',fontFamily:'Inter',fontSize:'13px'}}
+            labelStyle={{color:'#64748b'}} itemStyle={{color:'#00d4ff'}} />
+          <ReferenceLine y={0} stroke="#1e2d45" strokeDasharray="4 4" />
+          <Line type="monotone" dataKey="reward" stroke="url(#grad)" strokeWidth={2.5} dot={false} />
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#00d4ff"/>
+              <stop offset="100%" stopColor="#7c3aed"/>
+            </linearGradient>
+          </defs>
         </LineChart>
       </ResponsiveContainer>
     </div>

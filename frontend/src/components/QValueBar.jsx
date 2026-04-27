@@ -1,25 +1,24 @@
-export default function QValueBar({ label, value, max }) {
-  // value is null for illegal actions
-  if (value === null) {
-    return (
-      <div className="flex items-center gap-3 text-sm opacity-30">
-        <span className="text-gray-500 w-36 truncate">{label}</span>
-        <div className="flex-1 bg-gray-800 rounded-full h-2" />
-        <span className="w-16 text-right font-mono text-xs text-gray-600">illegal</span>
-      </div>
-    )
-  }
-  const pct   = max !== 0 ? Math.max(0, (value / (Math.abs(max) * 1.2)) * 100) : 0
-  const color = value > 0 ? "bg-green-500" : value < 0 ? "bg-red-500" : "bg-gray-600"
+export default function QValueBar({ label, value, max, actionIdx, selected }) {
+  if (value === null) return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, opacity:0.25 }}>
+      <span style={{ color:'#2a4060', fontSize:'clamp(10px,0.85vw,12px)', fontFamily:'JetBrains Mono,monospace', width:20 }}>A{actionIdx}</span>
+      <span style={{ color:'#3a5070', fontSize:'clamp(11px,0.9vw,13px)', width:80, flexShrink:0 }}>{label}</span>
+      <div style={{ flex:1, background:'#0a1628', borderRadius:3, height:4 }}/>
+      <span style={{ color:'#2a4060', fontSize:'clamp(10px,0.85vw,12px)', fontFamily:'JetBrains Mono,monospace', width:40, textAlign:'right' }}>—</span>
+    </div>
+  )
+  const pct   = max ? Math.max(0, (Math.abs(value) / (Math.abs(max) * 1.1)) * 100) : 0
+  const color = selected ? 'linear-gradient(90deg,#2563eb,#38bdf8)' : value < 0 ? '#7f1d1d' : '#1e3050'
+  const tc    = selected ? '#60a5fa' : value < 0 ? '#fb7185' : '#7a9bc0'
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <span className="text-gray-400 w-36 truncate">{label}</span>
-      <div className="flex-1 bg-gray-800 rounded-full h-2">
-        <div className={`${color} h-2 rounded-full transition-all duration-500`}
-             style={{ width: `${Math.min(pct, 100)}%` }} />
+    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+      <span style={{ color:'#2a4060', fontSize:'clamp(10px,0.85vw,12px)', fontFamily:'JetBrains Mono,monospace', width:20, flexShrink:0 }}>A{actionIdx}</span>
+      <span style={{ color: selected ? '#ffffff' : '#7a9bc0', fontSize:'clamp(11px,0.9vw,13px)', width:80, flexShrink:0, fontWeight: selected ? 600 : 400 }}>{label}{selected ? ' ✓' : ''}</span>
+      <div style={{ flex:1, background:'#0a1628', borderRadius:3, height:5 }}>
+        <div style={{ width:`${Math.min(pct,100)}%`, height:'100%', background:color, borderRadius:3, transition:'width 0.5s ease', boxShadow: selected ? '0 0 6px rgba(37,99,235,0.4)' : 'none' }}/>
       </div>
-      <span className={`w-16 text-right font-mono text-xs ${value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-gray-400"}`}>
-        {value.toFixed(2)}
+      <span style={{ color:tc, fontSize:'clamp(11px,0.9vw,13px)', fontFamily:'JetBrains Mono,monospace', fontWeight:700, width:46, textAlign:'right' }}>
+        {value > 0 ? '+' : ''}{value.toFixed(1)}
       </span>
     </div>
   )

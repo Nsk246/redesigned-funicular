@@ -1,47 +1,81 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Phase1 from './pages/Phase1'
 import Phase2 from './pages/Phase2'
-import Comparison from './pages/Comparison'
-import About from './pages/About'
+import About  from './pages/About'
 
 const TABS = [
-  { id:'about',      label:'Overview',   sub:'Problem & Design' },
-  { id:'phase1',     label:'Phase 1',    sub:'Single Agent'     },
-  { id:'phase2',     label:'Phase 2',    sub:'Multi-Agent'      },
-  { id:'comparison', label:'Comparison', sub:'P1 vs P2'         },
+  { id:'about',  label:'Overview' },
+  { id:'phase1', label:'Phase 1'  },
+  { id:'phase2', label:'Phase 2'  },
 ]
 
 export default function App() {
-  const [tab, setTab] = useState('about')
+  const [tab, setTab]   = useState('about')
+  const [time, setTime] = useState('')
+
+  useEffect(() => {
+    const tick = () => setTime(new Date().toTimeString().split(' ')[0])
+    tick(); const id = setInterval(tick, 1000); return () => clearInterval(id)
+  }, [])
+
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-lg">🏥</div>
-            <div>
-              <h1 className="font-bold text-white leading-tight">Hospital Triage AI</h1>
-              <p className="text-xs text-gray-500">RL + LLM Multi-Agent System</p>
-            </div>
+    <div style={{ minHeight:'100vh' }}>
+      {/* Header */}
+      <header style={{
+        background: 'rgba(2,8,24,0.75)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(59,130,246,0.2)',
+        position: 'sticky', top: 0, zIndex: 50,
+        height: 52,
+        display: 'flex', alignItems: 'center',
+        padding: '0 clamp(12px,2vw,24px)',
+        justifyContent: 'space-between',
+      }}>
+        {/* Logo */}
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{
+            width:30, height:30,
+            background: 'linear-gradient(135deg,#2563eb,#4f46e5)',
+            borderRadius:8,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            boxShadow: '0 0 16px rgba(37,99,235,0.6), 0 0 32px rgba(37,99,235,0.25)',
+            flexShrink:0,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="5.5" y="0" width="3" height="14" rx="1.5" fill="white"/>
+              <rect x="0" y="5.5" width="14" height="3" rx="1.5" fill="white"/>
+            </svg>
           </div>
-          <nav className="flex gap-1 bg-gray-900 rounded-xl p-1 border border-gray-800">
-            {TABS.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  tab===t.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 hover:text-white'
-                }`}>
-                <span>{t.label}</span>
-                <span className={`block text-xs font-normal ${tab===t.id?'text-blue-200':'text-gray-600'}`}>{t.sub}</span>
-              </button>
-            ))}
-          </nav>
+          <div>
+            <div style={{ color:'#ffffff', fontSize:'clamp(13px,1.1vw,15px)', fontWeight:700, lineHeight:1.2 }}>Hospital Triage AI</div>
+            <div style={{ color:'#4a78b0', fontSize:'clamp(9px,0.75vw,11px)' }}>RL + LLM Multi-Agent</div>
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav style={{ display:'flex', background:'#0a1830', border:'1px solid rgba(59,130,246,0.2)', borderRadius:8, padding:3, gap:2 }}>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`nav-tab${tab===t.id?' active':''}`}>
+              {t.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Status */}
+        <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(4,20,12,0.8)', border:'1px solid rgba(34,197,94,0.25)', borderRadius:20, padding:'5px 12px' }}>
+          <div style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 8px #22c55e' }}/>
+          <span style={{ color:'#4ade80', fontSize:'clamp(10px,0.85vw,12px)', fontWeight:600 }}>Live</span>
+          <span style={{ color:'rgba(74,222,128,0.4)', fontSize:'clamp(10px,0.85vw,12px)', fontFamily:'JetBrains Mono,monospace' }}>{time}</span>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {tab==='about'      && <About />}
-        {tab==='phase1'     && <Phase1 />}
-        {tab==='phase2'     && <Phase2 />}
-        {tab==='comparison' && <Comparison />}
+
+      {/* Page */}
+      <main className="page">
+        {tab==='about'  && <About />}
+        {tab==='phase1' && <Phase1 />}
+        {tab==='phase2' && <Phase2 />}
       </main>
     </div>
   )

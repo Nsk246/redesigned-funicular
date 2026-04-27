@@ -138,6 +138,9 @@ def supervisor_step(body: SupervisorStepInput):
     if len(body.patient_states) != 3:
         raise HTTPException(status_code=400, detail="Must provide exactly 3 patient states")
     try:
+        # Snapshot patient states BEFORE actions run
+        states_before = list(body.patient_states)
+
         sup_result = supervisor_agent.step(body.patient_states)
 
         triage_results = []
@@ -145,8 +148,20 @@ def supervisor_step(body: SupervisorStepInput):
             forced = None
             if sup_result["override_target"] == i:
                 forced = sup_result["override_action"]
-            _, _, _, info = ta.step(body.patient_states[i], forced_action=forced)
+            _, _, _, info = ta.step(states_before[i], forced_action=forced)
+            info["state_before_step"] = states_before[i]
             triage_results.append(info)
+
+        # Re-derive next_ward_state from ACTUAL patient states after actions
+        from utils.state_mapper import patients_to_ward_state
+        from agents.supervisor_agent import compute_ward_reward
+        actual_next_states = [t["next_state"] for t in triage_results]
+        actual_next_ward   = int(patients_to_ward_state(actual_next_states))
+        actual_reward      = compute_ward_reward(sup_result["ward_state"], sup_result["action"], actual_next_ward)
+        sup_result["next_ward_state"]       = actual_next_ward
+        sup_result["next_ward_state_label"] = ["Calm","Active","Busy","Overloaded","Crisis"][actual_next_ward]
+        sup_result["reward"]                = actual_reward
+        sup_result["ward_state_input"]      = states_before
 
         ward_report = ""
         if body.use_llm:
@@ -197,3 +212,28 @@ def get_metrics():
             "episode_rewards": supervisor_agent.episode_rewards[-50:]
         }
     }
+
+class ExplainRequest(BaseModel):
+    patient_id: int = 1
+    state: int
+    state_label: str
+    action: int
+    action_label: str
+    next_state: int
+    next_state_label: str
+    overridden: bool = False
+
+@app.post("/api/explain-step")
+async def explain_step(body: ExplainRequest):
+    from agents.llm_layer import generate_triage_explanation
+    explanation = generate_triage_explanation({
+        "patient_id":       body.patient_id,
+        "state":            body.state,
+        "state_label":      body.state_label,
+        "action":           body.action,
+        "action_label":     body.action_label,
+        "next_state":       body.next_state,
+        "next_state_label": body.next_state_label,
+        "overridden":       body.overridden,
+    })
+    return {"explanation": explanation}

@@ -1,327 +1,372 @@
 import { useState, useRef } from 'react'
 import axios from 'axios'
 import StateBadge from '../components/StateBadge'
-import ActionBadge from '../components/ActionBadge'
+import { ActionBadge, WardActionBadge } from '../components/ActionBadge'
 
 const API = "https://redesigned-funicular-46prpqg6xg53j79p-8000.app.github.dev"
 
-const WARD_COLORS = {
-  0: "border-green-500/40  bg-green-500/5",
-  1: "border-blue-500/40   bg-blue-500/5",
-  2: "border-yellow-500/40 bg-yellow-500/5",
-  3: "border-orange-500/40 bg-orange-500/5",
-  4: "border-red-500/40    bg-red-500/5",
+const TRIAGE_PROBS = {
+  '0-0':[0.85,0.12,0.03,0.00,0.00],
+  '1-0':[0.20,0.50,0.25,0.05,0.00],
+  '1-1':[0.50,0.35,0.12,0.03,0.00],
+  '1-2':[0.60,0.30,0.08,0.02,0.00],
+  '2-0':[0.05,0.15,0.40,0.30,0.10],
+  '2-1':[0.15,0.35,0.35,0.12,0.03],
+  '2-2':[0.25,0.40,0.25,0.08,0.02],
+  '2-3':[0.20,0.30,0.30,0.15,0.05],
+  '3-2':[0.15,0.30,0.30,0.20,0.05],
+  '3-3':[0.25,0.35,0.25,0.12,0.03],
+  '4-2':[0.00,0.00,0.25,0.45,0.30],
+  '4-3':[0.00,0.00,0.45,0.35,0.20],
+}
+const WARD_PROBS = {
+  '0-0':[0.80,0.15,0.04,0.01,0.00],
+  '1-0':[0.30,0.45,0.20,0.05,0.00],
+  '1-1':[0.45,0.40,0.12,0.03,0.00],
+  '2-0':[0.05,0.20,0.40,0.25,0.10],
+  '2-1':[0.15,0.35,0.35,0.12,0.03],
+  '2-2':[0.20,0.40,0.28,0.10,0.02],
+  '2-3':[0.25,0.40,0.25,0.08,0.02],
+  '3-1':[0.00,0.15,0.30,0.35,0.20],
+  '3-2':[0.00,0.20,0.35,0.30,0.15],
+  '3-3':[0.00,0.35,0.35,0.20,0.10],
+  '4-2':[0.00,0.00,0.20,0.45,0.35],
+  '4-3':[0.00,0.00,0.40,0.40,0.20],
 }
 
-const WARD_LABELS = ["Calm","Active","Busy","Overloaded","Crisis"]
+const STATE_LABELS = ['Healthy','At Risk','Unstable','Critical','Emergency']
+const WARD_STYLE = [
+  {color:'#4ade80',bg:'rgba(74,222,128,0.12)',   border:'rgba(74,222,128,0.35)',   label:'Calm',       rgb:'74,222,128'   },
+  {color:'#38bdf8',bg:'rgba(56,189,248,0.12)',  border:'rgba(56,189,248,0.35)',  label:'Active',     rgb:'56,189,248'  },
+  {color:'#a5b4fc',bg:'rgba(99,102,241,0.12)',   border:'rgba(99,102,241,0.35)',   label:'Busy',       rgb:'99,102,241'   },
+  {color:'#93c5fd',bg:'rgba(96,165,250,0.12)',   border:'rgba(96,165,250,0.35)',   label:'Overloaded', rgb:'96,165,250'   },
+  {color:'#fb7185',bg:'rgba(251,113,133,0.12)',  border:'rgba(251,113,133,0.35)',  label:'Crisis',     rgb:'251,113,133'  },
+]
+const PROB_COLORS     = ['#4ade80','#a5b4fc','#60a5fa','#fb7185','#c084fc']
+const WARD_PROB_COLORS= ['#4ade80','#67e8f9','#a5b4fc','#60a5fa','#fb7185']
+
+const C = {
+  page:'#020818',sidebar:'#081020',card:'#0f1f3d',
+  cardBorder:'#1e3050',text:'#ffffff',textSec:'#8099b8',
+  textMuted:'#4a6080',textDim:'#3a5070',
+}
+
+function WardBadge({w,size='md'}) {
+  const s=WARD_STYLE[w]
+  return <span style={{display:'inline-flex',alignItems:'center',padding:size==='lg'?'5px 13px':'3px 10px',borderRadius:20,fontSize:'clamp(11px,0.9vw,13px)',fontWeight:700,fontFamily:'DM Sans,sans-serif',whiteSpace:'nowrap',background:s.bg,color:s.color,border:`1.5px solid ${s.border}`}}>W{w} · {s.label}</span>
+}
 
 export default function Phase2() {
-  const [patientStates, setPatientStates] = useState([1, 2, 1])
-  const [result, setResult]               = useState(null)
-  const [history, setHistory]             = useState([])
-  const [loading, setLoading]             = useState(false)
-  const [episodeRunning, setEpisodeRunning] = useState(false)
-  const [episodeSteps, setEpisodeSteps]     = useState([])
-  const [episodeDone, setEpisodeDone]       = useState(false)
+  const [patientStates,setPS]      = useState([1,2,1])
+  const [result,setResult]         = useState(null)
+  const [loading,setLoading]       = useState(false)
+  const [episodeRunning,setEpRun]  = useState(false)
+  const [episodeSteps,setEpSteps]  = useState([])
+  const [episodeDone,setEpDone]    = useState(false)
   const stopRef = useRef(false)
 
   async function runStep() {
     setLoading(true)
-    try {
-      const res = await axios.post(`${API}/api/supervisor-step`, {
-        patient_states: patientStates, use_llm: true
-      })
-      setResult(res.data)
-      setPatientStates(res.data.triage_agents.map(t => t.next_state))
-      setHistory(h => [...h.slice(-7), res.data])
-    } catch(e) { alert("Error: " + e.message) }
-    finally { setLoading(false) }
+    try { const r=await axios.post(`${API}/api/supervisor-step`,{patient_states:patientStates,use_llm:true}); setResult(r.data); setPS(r.data.triage_agents.map(t=>t.next_state)) }
+    catch(e){alert(e.message)} finally{setLoading(false)}
   }
-
   async function runEpisode() {
-    const startStates = patientStates.map(s => parseInt(s))
-    setEpisodeRunning(true)
-    setEpisodeDone(false)
-    setEpisodeSteps([])
-    stopRef.current = false
-    let states = [...startStates]
-
-    for (let i = 0; i < 20; i++) {
-      if (stopRef.current) break
+    setEpRun(true); setEpDone(false); setEpSteps([]); stopRef.current=false
+    let states=[...patientStates]
+    for(let i=0;i<20;i++){
+      if(stopRef.current) break
       try {
-        const res = await axios.post(`${API}/api/supervisor-step`, {
-          patient_states: states, use_llm: false
-        })
-        setEpisodeSteps(prev => [...prev, { ...res.data, stepNum: i + 1 }])
-        states = res.data.triage_agents.map(t => t.next_state)
-        setPatientStates(states)
-        if (states.every(s => s === 0)) break
-        await new Promise(r => setTimeout(r, 700))
-      } catch(e) {
-        alert("Episode error: " + e.message)
-        break
-      }
+        const r=await axios.post(`${API}/api/supervisor-step`,{patient_states:states,use_llm:false})
+        setEpSteps(p=>[...p,{...r.data,stepNum:i+1}]); states=r.data.triage_agents.map(t=>t.next_state); setPS(states)
+        if(states.every(s=>s===0)) break
+        await new Promise(r=>setTimeout(r,600))
+      } catch(e){alert(e.message);break}
     }
-
-    setEpisodeRunning(false)
-    setEpisodeDone(true)
+    setEpRun(false); setEpDone(true)
   }
 
-  function stopEpisode() { stopRef.current = true }
-
-  const wardState      = result?.supervisor?.ward_state ?? null
-  const totalSupReward = episodeSteps.reduce((s,r) => s + r.supervisor.reward, 0)
-  const totalOverrides = episodeSteps.filter(r => r.supervisor.override_target !== null).length
+  const totalRew  = episodeSteps.reduce((s,r)=>s+r.supervisor.reward,0)
+  const totalOvr  = episodeSteps.filter(r=>r.supervisor.override_target!==null).length
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Phase 2 — Multi-Agent System</h1>
-          <p className="text-gray-400 text-sm mt-1">Supervisor Agent coordinates 3 Triage Agents across the ward</p>
-        </div>
-        {wardState !== null && (
-          <span className={`badge border px-4 py-2 text-sm font-bold ${WARD_COLORS[wardState]}`}>
-            Ward: {WARD_LABELS[wardState]}
-          </span>
-        )}
-      </div>
+    <div style={{display:'flex',flexDirection:'column',gap:0,background:C.page,minHeight:'calc(100vh - 52px)'}}>
 
-      {/* Patient inputs */}
-      <div className="card">
-        <h3 className="font-semibold text-gray-300 mb-4">Set Patient States</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {patientStates.map((s, i) => (
-            <div key={i} className="space-y-2">
-              <label className="text-sm text-gray-400">Patient {i+1}</label>
-              <select className="input" value={s}
-                onChange={e => setPatientStates(ps => ps.map((v,j) => j===i ? parseInt(e.target.value) : v))}>
-                {[0,1,2,3,4].map(v => (
-                  <option key={v} value={v}>S{v} — {["Healthy","At Risk","Unstable","Critical","Emergency"][v]}</option>
-                ))}
+      {/* TOP BAR */}
+      <div style={{background:C.sidebar,borderBottom:`1px solid ${C.cardBorder}`,padding:'clamp(14px,1.5vw,20px) clamp(16px,2vw,28px)'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
+          <div>
+            <h1 style={{color:C.text,fontSize:'clamp(18px,2vw,24px)',fontWeight:700,letterSpacing:'-0.02em',marginBottom:3}}>Phase 2 — Multi-Agent System</h1>
+            <p style={{color:C.textMuted,fontSize:'clamp(12px,1vw,14px)'}}>Supervisor Agent coordinates 3 Triage Agents across the ward</p>
+          </div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            <button className="btn btn-primary" onClick={runStep} disabled={loading||episodeRunning}>{loading?'Running...':'▶ Run Step'}</button>
+            {!episodeRunning
+              ?<button className="btn btn-green" onClick={runEpisode} disabled={loading}>⚡ Run Episode</button>
+              :<button className="btn btn-red" onClick={()=>stopRef.current=true}>⏹ Stop</button>}
+            <button className="btn-ghost" onClick={()=>{setResult(null);setPS([1,2,1]);setEpSteps([]);setEpDone(false)}}>Reset</button>
+          </div>
+        </div>
+
+        {/* Patient state selectors */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+          {patientStates.map((s,i)=>(
+            <div key={i} style={{background:C.card,border:`1.5px solid ${C.cardBorder}`,borderRadius:8,padding:'12px 14px'}}>
+              <div style={{color:C.textMuted,fontSize:'clamp(10px,0.85vw,12px)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>Patient {i+1}</div>
+              <select className="input" style={{marginBottom:8}} value={s}
+                onChange={e=>setPS(ps=>ps.map((v,j)=>j===i?parseInt(e.target.value):v))}>
+                {[0,1,2,3,4].map(v=><option key={v} value={v}>S{v} — {STATE_LABELS[v]}</option>)}
               </select>
-              <StateBadge state={s} size="lg" />
+              <StateBadge state={s}/>
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-3 mt-5">
-          <button onClick={runStep} disabled={loading || episodeRunning} className="btn-primary">
-            {loading ? "Running..." : "▶ Run Step"}
-          </button>
-          {!episodeRunning ? (
-            <button onClick={runEpisode} disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 disabled:opacity-40">
-              ⚡ Run Full Episode
-            </button>
-          ) : (
-            <button onClick={stopEpisode}
-              className="bg-red-600 hover:bg-red-500 text-white font-semibold px-5 py-2.5 rounded-xl transition-all">
-              ⏹ Stop
-            </button>
-          )}
-          <button onClick={() => {
-            setResult(null); setHistory([])
-            setPatientStates([1,2,1])
-            setEpisodeSteps([]); setEpisodeDone(false)
-          }} className="btn-secondary ml-auto">Reset</button>
-        </div>
       </div>
 
-      {/* Single step result */}
-      {result && !episodeSteps.length && (
-        <>
-          <div className={`card border-2 ${WARD_COLORS[result.supervisor.next_ward_state]}`}>
-            <h3 className="font-semibold text-gray-300 mb-4">Supervisor Decision</h3>
-            <div className="grid md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500 mb-1">Ward Before</p>
-                <span className={`badge border px-3 py-1 ${WARD_COLORS[result.supervisor.ward_state]}`}>
-                  W{result.supervisor.ward_state} · {result.supervisor.ward_state_label}
-                </span>
+      {/* RESULTS */}
+      <div style={{flex:1,padding:'clamp(14px,1.5vw,20px) clamp(16px,2vw,28px)',display:'flex',flexDirection:'column',gap:'clamp(12px,1.2vw,18px)'}}>
+
+        {!result&&!episodeSteps.length&&(
+          <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,padding:'60px 0',opacity:0.5}}>
+            <div style={{color:C.textSec,fontSize:'clamp(14px,1.2vw,17px)',fontWeight:600,textAlign:'center'}}>
+              Set patient states and run a step<br/>
+              <span style={{fontSize:'clamp(12px,1vw,14px)',fontWeight:400,color:C.textMuted}}>Multi-agent results will appear here</span>
+            </div>
+          </div>
+        )}
+
+        {result&&!episodeSteps.length&&(
+          <div style={{display:'flex',flexDirection:'column',gap:'clamp(12px,1.2vw,16px)'}}>
+
+            {/* Step 1 */}
+            <div className="card" style={{borderTop:'2px solid rgba(96,165,250,0.6)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                <div style={{width:28,height:28,borderRadius:8,background:'rgba(96,165,250,0.15)',border:'1px solid rgba(96,165,250,0.35)',display:'flex',alignItems:'center',justifyContent:'center',color:'#93c5fd',fontSize:13,fontWeight:800,flexShrink:0}}>1</div>
+                <div>
+                  <div style={{color:C.text,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>Supervisor assessed the ward</div>
+                  <div style={{color:C.textMuted,fontSize:'clamp(11px,0.9vw,13px)'}}>All 3 patient states aggregated → ward severity derived</div>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-500 mb-1">Action</p>
-                <span className="badge bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  B{result.supervisor.action} · {result.supervisor.action_label}
-                </span>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
+                {result.triage_agents.map((t,i)=>(
+                  <div key={i} style={{background:'#060d1a',border:`1px solid ${C.cardBorder}`,borderRadius:8,padding:'10px 12px',textAlign:'center'}}>
+                    <div className="t-label" style={{marginBottom:7}}>Patient {i+1}</div>
+                    <StateBadge state={t.state}/>
+                  </div>
+                ))}
               </div>
-              <div>
-                <p className="text-gray-500 mb-1">Ward After</p>
-                <span className={`badge border px-3 py-1 ${WARD_COLORS[result.supervisor.next_ward_state]}`}>
-                  W{result.supervisor.next_ward_state} · {result.supervisor.next_ward_state_label}
-                </span>
-              </div>
-              <div>
-                <p className="text-gray-500 mb-1">Reward</p>
-                <span className={`font-mono font-bold text-lg ${result.supervisor.reward >= 0 ? 'text-green-400':'text-red-400'}`}>
-                  {result.supervisor.reward > 0 ? '+' : ''}{result.supervisor.reward.toFixed(1)}
-                </span>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:14}}>
+                <div style={{flex:1,height:1,background:C.cardBorder}}/>
+                <div style={{textAlign:'center'}}>
+                  <div className="t-label" style={{marginBottom:6}}>Ward derived as</div>
+                  <WardBadge w={result.supervisor.ward_state} size="lg"/>
+                </div>
+                <div style={{flex:1,height:1,background:C.cardBorder}}/>
               </div>
             </div>
-            {result.supervisor.override_target !== null && (
-              <div className="mt-4 bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-sm text-purple-300">
-                ⚡ Override issued — Patient {result.supervisor.override_target + 1} action forced up one level
-              </div>
-            )}
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
-            {result.triage_agents.map((t, i) => (
-              <div key={i} className={`card border ${result.supervisor.override_target === i ? 'border-purple-500/60' : 'border-gray-800'}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold">Patient {i+1}</h4>
-                  {result.supervisor.override_target === i && (
-                    <span className="badge bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs">⚡ Overridden</span>
+            {/* Step 2 */}
+            <div className="card" style={{borderTop:'2px solid rgba(56,189,248,0.6)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                <div style={{width:28,height:28,borderRadius:8,background:'rgba(56,189,248,0.12)',border:'1px solid rgba(56,189,248,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#38bdf8',fontSize:13,fontWeight:800,flexShrink:0}}>2</div>
+                <div>
+                  <div style={{color:C.text,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>Supervisor chose action</div>
+                  <div style={{color:C.textMuted,fontSize:'clamp(11px,0.9vw,13px)'}}>Q-table policy from 3000 training episodes</div>
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+                <div style={{background:'#060d1a',border:`1px solid ${C.cardBorder}`,borderRadius:10,padding:'clamp(12px,1.2vw,16px)'}}>
+                  <div className="t-label" style={{marginBottom:10}}>Action Taken</div>
+                  <div style={{marginBottom:12}}><WardActionBadge action={result.supervisor.action}/></div>
+                  <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',marginBottom:10}}>
+                    <WardBadge w={result.supervisor.ward_state}/>
+                    <span style={{color:C.textDim,fontSize:16}}>→</span>
+                    <WardBadge w={result.supervisor.next_ward_state}/>
+                    {(()=>{const wp=WARD_PROBS[`${result.supervisor.ward_state}-${result.supervisor.action}`];const p=wp?wp[result.supervisor.next_ward_state]:null;return p!==null?<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:13,fontWeight:700}}>{(p*100).toFixed(0)}%</span>:null})()}
+                  </div>
+                  {result.supervisor.override_target!==null&&(
+                    <div style={{background:'rgba(192,132,252,0.1)',border:'1px solid rgba(192,132,252,0.3)',borderRadius:8,padding:'8px 12px'}}>
+                      <span style={{color:'#c084fc',fontSize:'clamp(12px,1vw,14px)',fontWeight:600}}>⚡ Overrode Patient {result.supervisor.override_target+1} — forced stronger action</span>
+                    </div>
                   )}
                 </div>
-                <div className="space-y-2 text-sm">
-                  {[
-                    ['Before', <StateBadge state={t.state} />],
-                    ['Action', <ActionBadge action={t.action} />],
-                    ['After',  <StateBadge state={t.next_state} />],
-                    ['Reward', <span className={`font-mono font-bold ${t.reward >= 0 ? 'text-green-400':'text-red-400'}`}>{t.reward > 0?'+':''}{t.reward.toFixed(1)}</span>]
-                  ].map(([label, el]) => (
-                    <div key={label} className="flex items-center gap-2">
-                      <span className="text-gray-500 w-16">{label}</span>{el}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {result.ward_report && (
-            <div className="card border border-blue-500/30 bg-blue-500/5">
-              <h3 className="font-semibold text-gray-300 mb-3">Ward Report (Claude)</h3>
-              <p className="text-gray-300 text-sm leading-relaxed">{result.ward_report}</p>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Episode timeline */}
-      {episodeSteps.length > 0 && (
-        <div className="card">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h3 className="font-semibold text-gray-200 text-lg">Episode Timeline</h3>
-              <p className="text-gray-500 text-sm mt-0.5">
-                {episodeRunning ? `Running... step ${episodeSteps.length}` : `Completed in ${episodeSteps.length} steps`}
-                {episodeDone && episodeSteps[episodeSteps.length-1]?.triage_agents.every(t => t.next_state === 0) &&
-                  <span className="ml-2 text-green-400 font-semibold">✓ Ward stabilized</span>}
-              </p>
-            </div>
-            {episodeDone && (
-              <div className="flex gap-6 text-right">
-                <div>
-                  <p className="text-xs text-gray-500">Supervisor Reward</p>
-                  <p className={`text-2xl font-bold font-mono ${totalSupReward >= 0 ? 'text-green-400':'text-red-400'}`}>
-                    {totalSupReward > 0?'+':''}{totalSupReward.toFixed(1)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Total Overrides</p>
-                  <p className="text-2xl font-bold font-mono text-purple-400">{totalOverrides}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Ward flow */}
-          <div className="flex items-center gap-1 flex-wrap mb-6">
-            {episodeSteps.map((step, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <div className={`rounded-lg px-2 py-1 text-xs font-bold border ${WARD_COLORS[step.supervisor.ward_state]}`}>
-                  W{step.supervisor.ward_state}
-                  {step.supervisor.override_target !== null && <span className="ml-1 text-purple-400">⚡</span>}
-                </div>
-                <span className="text-gray-600 text-xs">→</span>
-                {i === episodeSteps.length - 1 && (
-                  <div className={`rounded-lg px-2 py-1 text-xs font-bold border ${WARD_COLORS[step.supervisor.next_ward_state]}`}>
-                    W{step.supervisor.next_ward_state}
+                <div style={{background:'#060d1a',border:`1px solid ${C.cardBorder}`,borderRadius:10,padding:'clamp(12px,1.2vw,16px)'}}>
+                  <div className="t-label" style={{marginBottom:6}}>Ward Reward</div>
+                  <div style={{color:result.supervisor.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(22px,2.2vw,30px)',fontWeight:800,letterSpacing:'-0.02em',marginBottom:14}}>
+                    {result.supervisor.reward>0?'+':''}{result.supervisor.reward.toFixed(1)}
                   </div>
-                )}
-              </div>
-            ))}
-            {episodeRunning && (
-              <div className="w-6 h-6 rounded-full border-2 border-blue-500 border-t-transparent animate-spin ml-2" />
-            )}
-          </div>
-
-          {/* Episode table with triage actions visible */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-gray-500 text-left border-b border-gray-800">
-                  <th className="pb-2 pr-3">Step</th>
-                  <th className="pb-2 pr-3">Ward</th>
-                  <th className="pb-2 pr-3">Sup. Action</th>
-                  <th className="pb-2 pr-3 text-blue-300">P1 State</th>
-                  <th className="pb-2 pr-3 text-blue-300">P1 Action</th>
-                  <th className="pb-2 pr-3 text-teal-300">P2 State</th>
-                  <th className="pb-2 pr-3 text-teal-300">P2 Action</th>
-                  <th className="pb-2 pr-3 text-purple-300">P3 State</th>
-                  <th className="pb-2 pr-3 text-purple-300">P3 Action</th>
-                  <th className="pb-2 pr-3">Override</th>
-                  <th className="pb-2 pr-3">Reward</th>
-                  <th className="pb-2">Cumulative</th>
-                </tr>
-              </thead>
-              <tbody>
-                {episodeSteps.map((s, i) => {
-                  const cumulative = episodeSteps.slice(0,i+1).reduce((acc,r) => acc+r.supervisor.reward, 0)
-                  const sup = s.supervisor
-                  return (
-                    <tr key={i} className={`border-b border-gray-800/50 ${sup.override_target !== null ? 'bg-purple-500/5' : ''}`}>
-                      <td className="py-2 pr-3 text-gray-500 font-mono">{s.stepNum}</td>
-                      <td className="py-2 pr-3">
-                        <span className={`badge border text-xs ${WARD_COLORS[sup.ward_state]}`}>
-                          W{sup.ward_state} {sup.ward_state_label}
-                        </span>
-                      </td>
-                      <td className="py-2 pr-3 text-blue-400 whitespace-nowrap">{sup.action_label}</td>
-                      {s.triage_agents.map((t, j) => (
-                        <>
-                          <td key={`st-${j}`} className="py-2 pr-2">
-                            <div className="flex items-center gap-1">
-                              <StateBadge state={t.state} />
-                              <span className="text-gray-600">→</span>
-                              <StateBadge state={t.next_state} />
-                            </div>
-                          </td>
-                          <td key={`ac-${j}`} className="py-2 pr-3">
-                            <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${
-                              t.overridden
-                                ? 'bg-purple-500/20 text-purple-300'
-                                : 'bg-gray-800 text-gray-300'
-                            }`}>
-                              {t.action_label}
-                              {t.overridden && ' ⚡'}
-                            </span>
-                          </td>
-                        </>
+                  <div className="t-label" style={{marginBottom:8}}>Ward Transition Probs</div>
+                  {(()=>{const probs=WARD_PROBS[`${result.supervisor.ward_state}-${result.supervisor.action}`];return probs?(
+                    <div style={{display:'flex',flexDirection:'column',gap:7}}>
+                      {probs.map((p,w)=>p>0&&(
+                        <div key={w} style={{display:'flex',alignItems:'center',gap:7}}>
+                          <div style={{width:'clamp(60px,7vw,80px)',background:'#081020',borderRadius:3,height:4,flexShrink:0}}><div style={{width:`${p*100}%`,height:'100%',background:WARD_PROB_COLORS[w],borderRadius:3}}/></div>
+                          <span style={{color:C.textMuted,fontSize:11,fontFamily:'JetBrains Mono,monospace',width:26}}>{(p*100).toFixed(0)}%</span>
+                          <WardBadge w={w}/>
+                          {w===result.supervisor.next_ward_state&&<span style={{color:WARD_PROB_COLORS[w],fontSize:10,fontWeight:600}}>← occurred</span>}
+                        </div>
                       ))}
-                      <td className="py-2 pr-3">
-                        {sup.override_target !== null
-                          ? <span className="badge bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                              P{sup.override_target+1}
-                            </span>
-                          : <span className="text-gray-600">—</span>}
-                      </td>
-                      <td className={`py-2 pr-3 font-mono font-bold ${sup.reward >= 0 ? 'text-green-400':'text-red-400'}`}>
-                        {sup.reward > 0?'+':''}{sup.reward.toFixed(1)}
-                      </td>
-                      <td className={`py-2 font-mono ${cumulative >= 0 ? 'text-blue-400':'text-orange-400'}`}>
-                        {cumulative > 0?'+':''}{cumulative.toFixed(1)}
-                      </td>
-                    </tr>
+                    </div>
+                  ):null})()}
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="card" style={{borderTop:'2px solid rgba(74,222,128,0.6)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                <div style={{width:28,height:28,borderRadius:8,background:'rgba(74,222,128,0.12)',border:'1px solid rgba(74,222,128,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#4ade80',fontSize:13,fontWeight:800,flexShrink:0}}>3</div>
+                <div>
+                  <div style={{color:C.text,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>Patient outcomes</div>
+                  <div style={{color:C.textMuted,fontSize:'clamp(11px,0.9vw,13px)'}}>Each Triage Agent executed — overridden agents used Supervisor's forced action</div>
+                </div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+                {result.triage_agents.map((t,i)=>{
+                  const probs=TRIAGE_PROBS[`${t.state}-${t.action}`]
+                  const prob=probs?probs[t.next_state]:null
+                  const isOvr=result.supervisor.override_target===i
+                  const imp=t.next_state<t.state,wor=t.next_state>t.state
+                  return (
+                    <div key={i} style={{background:'#060d1a',border:`1.5px solid ${isOvr?'rgba(192,132,252,0.45)':C.cardBorder}`,borderRadius:10,padding:'clamp(12px,1.2vw,16px)'}}>
+                      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+                        <div className="t-label">Patient {i+1}</div>
+                        {isOvr&&<span style={{background:'rgba(192,132,252,0.12)',color:'#c084fc',border:'1px solid rgba(192,132,252,0.35)',borderRadius:20,padding:'2px 9px',fontSize:'clamp(10px,0.85vw,12px)',fontWeight:700}}>⚡ Overridden</span>}
+                      </div>
+                      <div style={{display:'flex',alignItems:'center',gap:7,flexWrap:'wrap',marginBottom:12}}>
+                        <StateBadge state={t.state}/>
+                        <span style={{color:C.textDim,fontSize:15}}>→</span>
+                        <ActionBadge action={t.action} overridden={t.overridden}/>
+                        <span style={{color:C.textDim,fontSize:15}}>→</span>
+                        <StateBadge state={t.next_state}/>
+                      </div>
+                      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',background:imp?'rgba(74,222,128,0.08)':wor?'rgba(251,113,133,0.08)':'rgba(255,255,255,0.02)',border:`1px solid ${imp?'rgba(74,222,128,0.25)':wor?'rgba(251,113,133,0.25)':'rgba(255,255,255,0.06)'}`,borderRadius:8,padding:'8px 12px'}}>
+                        <span style={{color:imp?'#4ade80':wor?'#fb7185':'#4a6080',fontSize:'clamp(12px,1vw,14px)',fontWeight:700}}>{imp?'↑ Improved':wor?'↓ Worsened':'→ Unchanged'}</span>
+                        <div style={{display:'flex',gap:14}}>
+                          <div style={{textAlign:'right'}}>
+                            <div className="t-label" style={{marginBottom:1}}>Prob</div>
+                            <div style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(13px,1.1vw,15px)'}}>{prob!==null?`${(prob*100).toFixed(0)}%`:'—'}</div>
+                          </div>
+                          <div style={{textAlign:'right'}}>
+                            <div className="t-label" style={{marginBottom:1}}>Reward</div>
+                            <div style={{color:t.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(13px,1.1vw,15px)'}}>{t.reward>0?'+':''}{t.reward.toFixed(1)}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )
                 })}
-              </tbody>
-            </table>
+              </div>
+            </div>
+
+            {result.ward_report&&(
+              <div className="card" style={{borderLeft:'2px solid rgba(37,99,235,0.6)',borderRadius:'0 12px 12px 0'}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:10}}>
+                  <div style={{width:7,height:7,borderRadius:'50%',background:'#2563eb',boxShadow:'0 0 8px rgba(37,99,235,0.7)'}}/>
+                  <div className="t-label">Claude Ward Report</div>
+                </div>
+                <p style={{color:C.textSec,fontSize:'clamp(13px,1.1vw,15px)',lineHeight:1.75}}>{result.ward_report}</p>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Episode */}
+        {episodeSteps.length>0&&(
+          <div className="card">
+            <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
+              <div>
+                <div className="t-label" style={{marginBottom:4}}>Episode Timeline</div>
+                <div style={{color:C.textSec,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>
+                  {episodeRunning?`Running · step ${episodeSteps.length}`:`${episodeSteps.length} steps`}
+                  {episodeDone&&episodeSteps[episodeSteps.length-1]?.triage_agents.every(t=>t.next_state===0)&&<span style={{color:'#4ade80',marginLeft:8}}>· Ward stabilized ✓</span>}
+                </div>
+              </div>
+              {episodeDone&&(
+                <div style={{display:'flex',gap:20,textAlign:'right'}}>
+                  <div><div className="t-label" style={{marginBottom:2}}>Supervisor Reward</div><div style={{color:totalRew>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(20px,2vw,26px)',fontWeight:800}}>{totalRew>0?'+':''}{totalRew.toFixed(1)}</div></div>
+                  <div><div className="t-label" style={{marginBottom:2}}>Overrides</div><div style={{color:'#c084fc',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(20px,2vw,26px)',fontWeight:800}}>{totalOvr}</div></div>
+                </div>
+              )}
+            </div>
+
+            {/* Ward flow */}
+            <div style={{background:'#060d1a',border:`1px solid ${C.cardBorder}`,borderRadius:8,padding:'clamp(10px,1vw,14px) clamp(14px,1.4vw,18px)',marginBottom:14,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',bottom:0,left:0,right:0,height:1,background:'linear-gradient(90deg,#fb7185,#60a5fa,#a5b4fc,#4ade80)',opacity:0.35}}/>
+              {episodeSteps.map((step,i)=>(
+                <div key={i} style={{display:'flex',alignItems:'center',gap:6,position:'relative',zIndex:1}}>
+                  {i===0&&<WardBadge w={step.supervisor.ward_state}/>}
+                  {step.supervisor.override_target!==null&&<span style={{color:'#c084fc',fontSize:13}}>⚡</span>}
+                  <span style={{color:C.textDim,fontSize:15}}>→</span>
+                  {i===episodeSteps.length-1?<WardBadge w={step.supervisor.next_ward_state}/>:<WardBadge w={step.supervisor.next_ward_state}/>}
+                </div>
+              ))}
+              {episodeRunning&&<div style={{width:16,height:16,borderRadius:'50%',border:'2px solid #2563eb',borderTopColor:'transparent',animation:'spin 0.7s linear infinite'}}/>}
+            </div>
+
+            {/* Table */}
+            <div style={{overflowX:'auto',border:`1px solid ${C.cardBorder}`,borderRadius:8}}>
+              <table className="data-table">
+                <thead><tr>
+                  <th style={{minWidth:36}}>#</th>
+                  <th style={{minWidth:260}}>Supervisor</th>
+                  <th style={{minWidth:260,color:'#38bdf8'}}>Patient 1</th>
+                  <th style={{minWidth:260,color:'#a5b4fc'}}>Patient 2</th>
+                  <th style={{minWidth:260,color:'#c084fc'}}>Patient 3</th>
+                  <th style={{minWidth:80}}>Reward</th>
+                  <th style={{minWidth:80}}>Cumul.</th>
+                </tr></thead>
+                <tbody>
+                  {episodeSteps.map((s,i)=>{
+                    const cum=episodeSteps.slice(0,i+1).reduce((a,r)=>a+r.supervisor.reward,0)
+                    const sup=s.supervisor
+                    const wp=WARD_PROBS[`${sup.ward_state}-${sup.action}`]
+                    const wpr=wp?wp[sup.next_ward_state]:null
+                    return (
+                      <tr key={i} style={sup.override_target!==null?{background:'rgba(192,132,252,0.04)'}:{}}>
+                        <td style={{color:C.textMuted,fontFamily:'JetBrains Mono,monospace'}}>{s.stepNum}</td>
+                        <td>
+                          <div style={{display:'flex',flexDirection:'column',gap:5}}>
+                            <div style={{display:'flex',alignItems:'center',gap:5,flexWrap:'nowrap'}}>
+                              <WardBadge w={sup.ward_state}/>
+                              <span style={{color:C.textDim}}>→</span>
+                              <WardActionBadge action={sup.action}/>
+                              <span style={{color:C.textDim}}>→</span>
+                              <WardBadge w={sup.next_ward_state}/>
+                              {wpr!==null&&<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:12,fontWeight:700}}>{(wpr*100).toFixed(0)}%</span>}
+                            </div>
+                            {sup.override_target!==null&&<span style={{background:'rgba(192,132,252,0.1)',color:'#c084fc',border:'1px solid rgba(192,132,252,0.3)',borderRadius:20,padding:'2px 8px',fontSize:11,fontWeight:700,width:'fit-content'}}>⚡ Forced P{sup.override_target+1} to escalate</span>}
+                          </div>
+                        </td>
+                        {s.triage_agents.map((t,j)=>{
+                          const tp=TRIAGE_PROBS[`${t.state}-${t.action}`]
+                          const prob=tp?tp[t.next_state]:null
+                          const imp=t.next_state<t.state,wor=t.next_state>t.state
+                          return (
+                            <td key={j}>
+                              <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'nowrap'}}>
+                                <StateBadge state={t.state}/>
+                                <span style={{color:C.textDim}}>→</span>
+                                <span style={{padding:'2px 7px',borderRadius:5,fontSize:'clamp(10px,0.85vw,12px)',fontWeight:700,fontFamily:'DM Sans,sans-serif',whiteSpace:'nowrap',background:t.overridden?'rgba(192,132,252,0.12)':'rgba(255,255,255,0.03)',color:t.overridden?'#c084fc':'#4a6080',border:`1px solid ${t.overridden?'rgba(192,132,252,0.4)':'rgba(255,255,255,0.07)'}`}}>A{t.action}{t.overridden?'⚡':''}</span>
+                                <span style={{color:C.textDim}}>→</span>
+                                <StateBadge state={t.next_state}/>
+                                {prob!==null&&<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:12,fontWeight:700}}>{(prob*100).toFixed(0)}%</span>}
+                                <span style={{color:imp?'#4ade80':wor?'#fb7185':C.textMuted,fontSize:12,fontWeight:700}}>{imp?'↑':wor?'↓':'='}</span>
+                              </div>
+                            </td>
+                          )
+                        })}
+                        <td style={{color:sup.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{sup.reward>0?'+':''}{sup.reward.toFixed(1)}</td>
+                        <td style={{color:cum>=0?'#60a5fa':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 }

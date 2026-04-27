@@ -1,13 +1,3 @@
-"""
-llm_layer.py
-------------
-LLM Integration Layer using Anthropic Claude API.
-
-Two responsibilities:
-    1. INPUT  : Parse User's natural language -> structured patient vitals
-    2. OUTPUT : Translate RL decision -> natural language explanation
-"""
-
 import anthropic
 import json
 import os
@@ -18,84 +8,133 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '../../.env'))
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 MODEL  = "claude-haiku-4-5-20251001"
 
+STATE_NAMES  = ['Healthy','At Risk','Unstable','Critical','Emergency']
+ACTION_NAMES = ['Monitor','Treat','Escalate','Emergency Response']
+WARD_NAMES   = ['Calm','Active','Busy','Overloaded','Crisis']
+
 
 def parse_patient_input(natural_language: str) -> dict:
-    """Parse natural language patient description into structured vitals."""
+    prompt = f"""You are a clinical data extraction assistant for a hospital triage system.
 
-    prompt = f"""Extract patient vitals from the text and return ONLY a JSON object.
-No explanation, no markdown, no backticks. Just the raw JSON.
+Extract patient vitals from the text. Return ONLY a valid JSON object — no explanation, no markdown, no backticks.
 
-Use these defaults for any missing values:
-hr=75, bp_sys=120, bp_dia=80, temp=37.0, spo2=98, age=50, conditions=0
+SEVERITY INFERENCE — if no numbers given, use these vitals:
+- "coding" / "arresting" / "unresponsive"        → hr:160, bp_sys:200, bp_dia:120, temp:40.2, spo2:82, age:65, conditions:3
+- "emergency" / "life threatening" / "crashing"  → hr:150, bp_sys:192, bp_dia:118, temp:40.0, spo2:85, age:60, conditions:2
+- "critical" / "very sick" / "severe"            → hr:128, bp_sys:170, bp_dia:100, temp:39.3, spo2:92, age:58, conditions:2
+- "serious" / "unstable" / "deteriorating"       → hr:118, bp_sys:158, bp_dia:95,  temp:38.8, spo2:93, age:55, conditions:1
+- "at risk" / "concerning" / "unwell"            → hr:102, bp_sys:142, bp_dia:88,  temp:37.8, spo2:95, age:50, conditions:0
+- "stable" / "fine" / "normal" / "healthy"       → hr:75,  bp_sys:120, bp_dia:80,  temp:37.0, spo2:98, age:50, conditions:0
+
+DEFAULT (no severity mentioned at all): hr:75, bp_sys:120, bp_dia:80, temp:37.0, spo2:98, age:50, conditions:0
+
+If the text contains actual numbers, extract them directly and ignore the severity inference above.
 
 Text: "{natural_language}"
 
-Return exactly this structure:
-{{"hr": 75, "bp_sys": 120, "bp_dia": 80, "temp": 37.0, "spo2": 98, "age": 50, "conditions": 0}}"""
+Return exactly this JSON with no other text:
+{{"hr": 0, "bp_sys": 0, "bp_dia": 0, "temp": 0.0, "spo2": 0, "age": 0, "conditions": 0}}"""
 
     message = client.messages.create(
         model=MODEL,
         max_tokens=200,
         messages=[{"role": "user", "content": prompt}]
     )
-
     raw = message.content[0].text.strip()
-
-    # Strip any accidental markdown fences
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
-    raw = raw.strip()
-
-    return json.loads(raw)
+    return json.loads(raw.strip())
 
 
 def generate_triage_explanation(transition: dict) -> str:
-    """Generate clinical explanation of the Triage Agent's decision."""
+    s  = int(transition['state'])
+    ns = int(transition['next_state'])
 
-    prompt = f"""You are a clinical decision support assistant explaining an AI triage decision to a doctor.
-Be concise — 2-3 sentences maximum.
+    if ns < s:
+        outcome_fact = f"the patient IMPROVED from {STATE_NAMES[s]} to {STATE_NAMES[ns]}"
+    elif ns > s:
+        outcome_fact = f"the patient WORSENED from {STATE_NAMES[s]} to {STATE_NAMES[ns]}"
+    else:
+        outcome_fact = f"the patient's condition was UNCHANGED, remaining {STATE_NAMES[s]}"
 
-Patient: {transition['patient_id']}
-State before: {transition['state_label']} (S{transition['state']})
-Action taken: {transition['action_label']}
-Outcome: Patient moved to {transition['next_state_label']} (S{transition['next_state']})
-Overridden by Supervisor: {transition.get('overridden', False)}
+    override_line = ""
+    if transition.get('overridden', False):
+        override_line = "The Supervisor overrode this decision and forced a stronger intervention than the Triage Agent originally selected."
 
-Write a clinical explanation. Do not mention rewards, Q-values, or AI internals."""
+    prompt = f"""Write exactly 2 clinical sentences about this triage event. Do not add any other text.
+
+INPUT FACTS (do not contradict these):
+- Starting condition: {STATE_NAMES[s]} (severity {s}/4)
+- Action taken: {transition['action_label']}
+- Result: {outcome_fact}
+{override_line}
+
+Sentence 1: Why {transition['action_label']} was the right action for a {STATE_NAMES[s]} patient.
+Sentence 2: State clearly that {outcome_fact}. If unchanged or worsened, explain this can happen despite correct treatment.
+
+Do NOT mention: rewards, Q-values, AI, machine learning, algorithms, or scores."""
 
     message = client.messages.create(
         model=MODEL,
-        max_tokens=150,
+        max_tokens=160,
         messages=[{"role": "user", "content": prompt}]
     )
     return message.content[0].text.strip()
 
 
 def generate_ward_report(supervisor_result: dict, triage_results: list) -> str:
-    """Generate ward-level summary report."""
+    ward_before = supervisor_result['ward_state_label']
+    ward_after  = supervisor_result['next_ward_state_label']
+    ws  = supervisor_result['ward_state']
+    wns = supervisor_result['next_ward_state']
 
-    patient_summary = "\n".join([
-        f"- Patient {t['patient_id']}: {t['state_label']} → {t['next_state_label']} (Action: {t['action_label']})"
-        for t in triage_results
-    ])
+    if wns < ws:
+        ward_outcome = f"IMPROVED from {ward_before} to {ward_after}"
+    elif wns > ws:
+        ward_outcome = f"WORSENED from {ward_before} to {ward_after}"
+    else:
+        ward_outcome = f"REMAINED at {ward_before}"
 
-    prompt = f"""You are a hospital ward AI providing a brief status report to the attending physician.
-Be concise — 3-4 sentences maximum.
+    patient_lines = []
+    for t in triage_results:
+        s  = int(t['state'])
+        ns = int(t['next_state'])
+        if ns < s:
+            delta = "improved"
+        elif ns > s:
+            delta = "worsened"
+        else:
+            delta = "unchanged"
+        override = " [OVERRIDDEN by Supervisor]" if t.get('overridden') else ""
+        patient_lines.append(
+            f"- Patient {t['patient_id']}: {STATE_NAMES[s]} → {STATE_NAMES[ns]} ({delta}) via {t['action_label']}{override}"
+        )
 
-Ward: {supervisor_result['ward_state_label']} → {supervisor_result['next_ward_state_label']}
-Supervisor action: {supervisor_result['action_label']}
-Override issued: {'Yes, Patient ' + str(supervisor_result['override_target'] + 1) if supervisor_result['override_target'] is not None else 'No'}
+    override_note = ""
+    if supervisor_result['override_target'] is not None:
+        override_note = f"Supervisor overrode Patient {supervisor_result['override_target']+1}'s action."
 
-Patients:
-{patient_summary}
+    prompt = f"""Write exactly 3 clinical sentences as a ward status report. No other text.
 
-Write a clinical ward report. Do not mention rewards, Q-values, or AI internals."""
+WARD FACTS (do not contradict):
+- Ward status: {ward_outcome}
+- Supervisor action taken: {supervisor_result['action_label']}
+- {override_note if override_note else 'No overrides issued.'}
+
+Patient outcomes:
+{chr(10).join(patient_lines)}
+
+Sentence 1: Ward-level summary — what the supervisor decided and why given the ward status.
+Sentence 2: Patient-by-patient outcomes — who improved, who worsened, who was unchanged.
+Sentence 3: Recommended immediate next steps for the attending physician.
+
+Do NOT mention: rewards, Q-values, AI, machine learning, algorithms, or scores."""
 
     message = client.messages.create(
         model=MODEL,
-        max_tokens=200,
+        max_tokens=220,
         messages=[{"role": "user", "content": prompt}]
     )
     return message.content[0].text.strip()
