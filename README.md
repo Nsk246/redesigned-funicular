@@ -26,6 +26,8 @@ A hybrid **Reinforcement Learning + LLM multi-agent system** for intelligent pat
 ---
 
 ## 🗂️ Project Structure
+
+```text
 hospital-triage-agent/
 ├── backend/
 │   ├── agents/
@@ -37,20 +39,20 @@ hospital-triage-agent/
 │   ├── models/
 │   │   ├── dqn_model.py           # Neural network architecture
 │   │   └── saved/
-│   │       ├── triage_agent.pth   # Trained DQN weights
-│   │       └── supervisor_qtable.npy  # Trained Q-table
+│   │       ├── triage_agent.pth
+│   │       └── supervisor_qtable.npy
 │   ├── training/
-│   │   ├── train_triage.py        # Phase 1 training script
-│   │   └── train_supervisor.py    # Phase 2 training script
+│   │   ├── train_triage.py
+│   │   └── train_supervisor.py
 │   ├── utils/
-│   │   └── state_mapper.py        # Vitals → state mapping
+│   │   └── state_mapper.py
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── About.jsx          # Overview, MDP docs, interactive demos
-│   │   │   ├── Phase1.jsx         # Triage agent UI
-│   │   │   └── Phase2.jsx         # Multi-agent UI
+│   │   │   ├── About.jsx
+│   │   │   ├── Phase1.jsx
+│   │   │   └── Phase2.jsx
 │   │   ├── components/
 │   │   │   ├── StateBadge.jsx
 │   │   │   ├── ActionBadge.jsx
@@ -58,7 +60,7 @@ hospital-triage-agent/
 │   │   └── App.jsx
 │   └── package.json
 └── README.md
-
+```
 ---
 
 ## 🔬 MDP Design
