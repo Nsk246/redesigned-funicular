@@ -3,7 +3,7 @@ import axios from 'axios'
 import StateBadge from '../components/StateBadge'
 import { ActionBadge, WardActionBadge } from '../components/ActionBadge'
 
-const API = "https://redesigned-funicular-46prpqg6xg53j79p-8000.app.github.dev"
+const API = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 const TRIAGE_PROBS = {
   '0-0':[0.85,0.12,0.03,0.00,0.00],
