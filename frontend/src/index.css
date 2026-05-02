@@ -3,22 +3,41 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: #020818;
+}
+
+body {
   margin: 0;
   padding: 0;
   min-height: 100%;
   font-family: 'Inter', sans-serif;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
+  background: transparent;
+}
+
+/* Fixed background pseudo-element — GPU composited, never repaints on scroll */
+#root {
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+}
+
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background-color: #020818;
   background-image:
     radial-gradient(ellipse 160% 90% at 50% -10%, rgba(37,99,235,0.95) 0%, rgba(79,70,229,0.7) 20%, rgba(37,99,235,0.3) 45%, transparent 65%),
     radial-gradient(ellipse 60% 50% at 95% 40%, rgba(59,130,246,0.3) 0%, transparent 50%),
     radial-gradient(ellipse 50% 40% at 0% 70%, rgba(99,102,241,0.25) 0%, transparent 45%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
-  will-change: auto;
+  will-change: transform;
   transform: translateZ(0);
 }
 
