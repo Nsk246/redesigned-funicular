@@ -135,7 +135,7 @@ export default function Phase1() {
     <div style={{display:'flex',flexDirection:'column',background:'#060d1a',minHeight:'calc(100vh - 52px)'}}>
 
       {/* TOP BAR */}
-      <div style={{background:'#0f1f3d',borderBottom:'1px solid #1e3050',padding:'clamp(16px,1.8vw,24px) clamp(20px,2.5vw,36px)'}}>
+      <div style={{background:'#0f1f3d',borderBottom:'1px solid #1e3050',padding:'clamp(10px,1.8vw,24px) clamp(10px,2.5vw,36px)'}}>
         {/* Title + buttons */}
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:18,flexWrap:'wrap',gap:12}}>
           <div>
@@ -185,7 +185,7 @@ export default function Phase1() {
             </button>
           </div>
         ):(
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:10}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(120px,1fr))',gap:8}}>
             {FIELDS.map(f=>(
               <VitalInput key={f.key} label={f.label} fieldKey={f.key} value={vitals[f.key]} unit={f.unit} step={f.step} onChange={updateVital}/>
             ))}
@@ -194,7 +194,7 @@ export default function Phase1() {
       </div>
 
       {/* RESULTS */}
-      <div style={{flex:1,padding:'clamp(16px,1.8vw,24px) clamp(20px,2.5vw,36px)',display:'flex',flexDirection:'column',gap:'clamp(14px,1.4vw,20px)'}}>
+      <div style={{flex:1,padding:'clamp(10px,1.8vw,24px) clamp(10px,2.5vw,36px)',display:'flex',flexDirection:'column',gap:'clamp(14px,1.4vw,20px)'}}>
 
         {/* Empty */}
         {!result&&!episodeSteps.length&&(

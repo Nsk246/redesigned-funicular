@@ -25,10 +25,12 @@ export default function App() {
         background: '#060e1c',
         borderBottom: '1px solid rgba(59,130,246,0.2)',
         position: 'sticky', top: 0, zIndex: 50,
-        height: 52,
+        minHeight: 52,
         display: 'flex', alignItems: 'center',
-        padding: '0 clamp(12px,2vw,24px)',
+        padding: '8px clamp(10px,2vw,24px)',
         justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 8,
       }}>
         {/* Logo */}
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -62,7 +64,7 @@ export default function App() {
         </nav>
 
         {/* Status */}
-        <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(4,20,12,0.8)', border:'1px solid rgba(34,197,94,0.25)', borderRadius:20, padding:'5px 12px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(4,20,12,0.8)', border:'1px solid rgba(34,197,94,0.25)', borderRadius:20, padding:'5px 12px', flexShrink:0 }}>
           <div style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 8px #22c55e' }}/>
           <span style={{ color:'#4ade80', fontSize:'clamp(13px,1vw,15px)', fontWeight:600 }}>Live</span>
           <span style={{ color:'rgba(74,222,128,0.4)', fontSize:'clamp(13px,1vw,15px)', fontFamily:'JetBrains Mono,monospace' }}>{time}</span>
