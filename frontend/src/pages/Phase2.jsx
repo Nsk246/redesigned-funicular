@@ -110,13 +110,13 @@ export default function Phase2() {
     <div style={{display:'flex',flexDirection:'column',gap:0,background:C.page,minHeight:'calc(100vh - 52px)'}}>
 
       {/* TOP BAR */}
-      <div style={{background:C.sidebar,borderBottom:`1px solid ${C.cardBorder}`,padding:'clamp(14px,1.5vw,20px) clamp(16px,2vw,28px)'}}>
+      <div style={{background:C.sidebar,borderBottom:`1px solid ${C.cardBorder}`,padding:'clamp(10px,1.5vw,20px) clamp(10px,2vw,28px)'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
           <div>
             <h1 style={{color:C.text,fontSize:'clamp(18px,2vw,24px)',fontWeight:700,letterSpacing:'-0.02em',marginBottom:3}}>Phase 2 — Multi-Agent System</h1>
             <p style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>Supervisor Agent coordinates 3 Triage Agents across the ward</p>
           </div>
-          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap',width:'100%'}}>
             <button className="btn btn-primary" onClick={runStep} disabled={loading||episodeRunning}>{loading?'Running...':'▶ Run Step'}</button>
             {!episodeRunning
               ?<button className="btn btn-green" onClick={runEpisode} disabled={loading}>⚡ Run Episode</button>
@@ -126,11 +126,11 @@ export default function Phase2() {
         </div>
 
         {/* Patient state selectors */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:8}}>
           {patientStates.map((s,i)=>(
             <div key={i} style={{background:C.card,border:`1.5px solid ${C.cardBorder}`,borderRadius:8,padding:'12px 14px'}}>
               <div style={{color:C.textMuted,fontSize:'clamp(13px,1vw,15px)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>Patient {i+1}</div>
-              <select className="input" style={{marginBottom:8}} value={s}
+              <select className="input" style={{marginBottom:8,minWidth:0,overflow:'hidden',textOverflow:'ellipsis'}} value={s}
                 onChange={e=>setPS(ps=>ps.map((v,j)=>j===i?parseInt(e.target.value):v))}>
                 {[0,1,2,3,4].map(v=><option key={v} value={v}>S{v} — {STATE_LABELS[v]}</option>)}
               </select>
@@ -141,7 +141,7 @@ export default function Phase2() {
       </div>
 
       {/* RESULTS */}
-      <div style={{flex:1,padding:'clamp(14px,1.5vw,20px) clamp(16px,2vw,28px)',display:'flex',flexDirection:'column',gap:'clamp(12px,1.2vw,18px)'}}>
+      <div style={{flex:1,padding:'clamp(10px,1.5vw,20px) clamp(10px,2vw,28px)',display:'flex',flexDirection:'column',gap:'clamp(12px,1.2vw,18px)'}}>
 
         {!result&&!episodeSteps.length&&(
           <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,padding:'60px 0',opacity:0.5}}>
@@ -238,7 +238,7 @@ export default function Phase2() {
                   <div style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>Each Triage Agent executed — overridden agents used Supervisor's forced action</div>
                 </div>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:8}}>
                 {result.triage_agents.map((t,i)=>{
                   const probs=TRIAGE_PROBS[`${t.state}-${t.action}`]
                   const prob=probs?probs[t.next_state]:null
@@ -291,7 +291,7 @@ export default function Phase2() {
         {/* Episode */}
         {episodeSteps.length>0&&(
           <div className="card">
-            <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
+            <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:12,flexWrap:'wrap',gap:8}}>
               <div>
                 <div className="t-label" style={{marginBottom:4}}>Episode Timeline</div>
                 <div style={{color:C.textSec,fontSize:'clamp(15px,1.2vw,17px)',fontWeight:600}}>
