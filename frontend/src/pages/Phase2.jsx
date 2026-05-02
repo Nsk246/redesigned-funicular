@@ -63,6 +63,8 @@ export default function Phase2() {
   const [episodeRunning,setEpRun]  = useState(false)
   const [episodeSteps,setEpSteps]  = useState([])
   const [episodeDone,setEpDone]    = useState(false)
+  const [explanation,setExpl]      = useState(null)
+  const [llmLoading,setLlmLoad]    = useState(false)
   const stopRef = useRef(false)
 
   async function runStep() {
@@ -83,6 +85,22 @@ export default function Phase2() {
       } catch(e){alert(e.message);break}
     }
     setEpRun(false); setEpDone(true)
+  }
+
+  async function askWardExplain(step) {
+    setLlmLoad(true)
+    try {
+      const r = await axios.post(`${API}/api/ward-explain`, {
+        ward_state:       step.supervisor.ward_state,
+        ward_state_label: step.supervisor.ward_state_label,
+        action:           step.supervisor.action,
+        action_label:     step.supervisor.action_label,
+        next_ward_state:  step.supervisor.next_ward_state,
+        override_target:  step.supervisor.override_target,
+        triage_agents:    step.triage_agents,
+      })
+      setExpl(r.data.ward_report)
+    } catch(e){alert(e.message)} finally{setLlmLoad(false)}
   }
 
   const totalRew  = episodeSteps.reduce((s,r)=>s+r.supervisor.reward,0)
@@ -314,6 +332,7 @@ export default function Phase2() {
                   <th style={{minWidth:260,color:'#c084fc'}}>Patient 3</th>
                   <th style={{minWidth:80}}>Reward</th>
                   <th style={{minWidth:80}}>Cumul.</th>
+                  <th style={{minWidth:60}}>Ask</th>
                 </tr></thead>
                 <tbody>
                   {episodeSteps.map((s,i)=>{
@@ -357,12 +376,22 @@ export default function Phase2() {
                         })}
                         <td style={{color:sup.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{sup.reward>0?'+':''}{sup.reward.toFixed(1)}</td>
                         <td style={{color:cum>=0?'#60a5fa':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
+                        <td><button onClick={()=>askWardExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#93c5fd',border:'1.5px solid rgba(37,99,235,0.35)',padding:'4px 12px',borderRadius:7,fontSize:'clamp(11px,0.9vw,13px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}>{llmLoading?'...':'Ask'}</button></td>
                       </tr>
                     )
                   })}
                 </tbody>
               </table>
             </div>
+          {explanation&&(
+            <div style={{marginTop:14,background:'rgba(37,99,235,0.07)',border:'1px solid rgba(37,99,235,0.25)',borderLeft:'3px solid #2563eb',borderRadius:'0 10px 10px 0',padding:'clamp(14px,1.4vw,18px)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}>
+                <div style={{width:7,height:7,borderRadius:'50%',background:'#2563eb',boxShadow:'0 0 8px rgba(37,99,235,0.7)'}}/>
+                <div className="t-label">Claude Ward Report</div>
+              </div>
+              <p style={{color:'#c0d8f0',fontSize:'clamp(14px,1.2vw,16px)',lineHeight:1.75}}>{explanation}</p>
+            </div>
+          )}
           </div>
         )}
       </div>

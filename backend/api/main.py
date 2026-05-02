@@ -227,6 +227,37 @@ class ExplainRequest(BaseModel):
     next_state_label: str
     overridden: bool = False
 
+@app.post("/api/ward-explain")
+async def ward_explain(body: dict):
+    """Generate Claude ward report for a specific episode step."""
+    try:
+        from agents.llm_layer import generate_ward_report
+        # Reconstruct supervisor_result and triage_results from request
+        supervisor_result = {
+            "ward_state":       body["ward_state"],
+            "ward_state_label": body["ward_state_label"],
+            "action":           body["action"],
+            "action_label":     body["action_label"],
+            "next_ward_state":  body["next_ward_state"],
+            "next_ward_state_label": ["Calm","Active","Busy","Overloaded","Crisis"][body["next_ward_state"]],
+            "override_target":  body.get("override_target"),
+            "ward_state_input": [],
+        }
+        triage_results = []
+        for i, t in enumerate(body.get("triage_agents", [])):
+            triage_results.append({
+                "patient_id":   i + 1,
+                "state":        t["state"],
+                "next_state":   t["next_state"],
+                "action_label": ["Monitor","Treat","Escalate","Emergency Response"][t["action"]],
+                "overridden":   t.get("overridden", False),
+            })
+        ward_report = generate_ward_report(supervisor_result, triage_results)
+        return {"ward_report": ward_report}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/explain-step")
 async def explain_step(body: ExplainRequest):
     from agents.llm_layer import generate_triage_explanation
