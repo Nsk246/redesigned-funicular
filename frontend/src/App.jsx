@@ -22,9 +22,7 @@ export default function App() {
     <div style={{ minHeight:'100vh' }}>
       {/* Header */}
       <header style={{
-        background: 'rgba(2,8,24,0.75)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: '#060e1c',
         borderBottom: '1px solid rgba(59,130,246,0.2)',
         position: 'sticky', top: 0, zIndex: 50,
         height: 52,

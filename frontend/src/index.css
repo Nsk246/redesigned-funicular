@@ -18,6 +18,8 @@ html, body {
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
+  will-change: auto;
+  transform: translateZ(0);
 }
 
 #root { min-height: 100vh; }
