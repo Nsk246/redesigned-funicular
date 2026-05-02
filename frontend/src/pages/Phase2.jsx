@@ -53,7 +53,7 @@ const C = {
 
 function WardBadge({w,size='md'}) {
   const s=WARD_STYLE[w]
-  return <span style={{display:'inline-flex',alignItems:'center',padding:size==='lg'?'5px 13px':'3px 10px',borderRadius:20,fontSize:'clamp(11px,0.9vw,13px)',fontWeight:700,fontFamily:'DM Sans,sans-serif',whiteSpace:'nowrap',background:s.bg,color:s.color,border:`1.5px solid ${s.border}`}}>W{w} · {s.label}</span>
+  return <span style={{display:'inline-flex',alignItems:'center',padding:size==='lg'?'5px 13px':'3px 10px',borderRadius:20,fontSize:'clamp(14px,1.1vw,16px)',fontWeight:700,fontFamily:'DM Sans,sans-serif',whiteSpace:'nowrap',background:s.bg,color:s.color,border:`1.5px solid ${s.border}`}}>W{w} · {s.label}</span>
 }
 
 export default function Phase2() {
@@ -114,7 +114,7 @@ export default function Phase2() {
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
           <div>
             <h1 style={{color:C.text,fontSize:'clamp(18px,2vw,24px)',fontWeight:700,letterSpacing:'-0.02em',marginBottom:3}}>Phase 2 — Multi-Agent System</h1>
-            <p style={{color:C.textMuted,fontSize:'clamp(12px,1vw,14px)'}}>Supervisor Agent coordinates 3 Triage Agents across the ward</p>
+            <p style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>Supervisor Agent coordinates 3 Triage Agents across the ward</p>
           </div>
           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
             <button className="btn btn-primary" onClick={runStep} disabled={loading||episodeRunning}>{loading?'Running...':'▶ Run Step'}</button>
@@ -129,7 +129,7 @@ export default function Phase2() {
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
           {patientStates.map((s,i)=>(
             <div key={i} style={{background:C.card,border:`1.5px solid ${C.cardBorder}`,borderRadius:8,padding:'12px 14px'}}>
-              <div style={{color:C.textMuted,fontSize:'clamp(10px,0.85vw,12px)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>Patient {i+1}</div>
+              <div style={{color:C.textMuted,fontSize:'clamp(13px,1vw,15px)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>Patient {i+1}</div>
               <select className="input" style={{marginBottom:8}} value={s}
                 onChange={e=>setPS(ps=>ps.map((v,j)=>j===i?parseInt(e.target.value):v))}>
                 {[0,1,2,3,4].map(v=><option key={v} value={v}>S{v} — {STATE_LABELS[v]}</option>)}
@@ -147,7 +147,7 @@ export default function Phase2() {
           <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,padding:'60px 0',opacity:0.5}}>
             <div style={{color:C.textSec,fontSize:'clamp(14px,1.2vw,17px)',fontWeight:600,textAlign:'center'}}>
               Set patient states and run a step<br/>
-              <span style={{fontSize:'clamp(12px,1vw,14px)',fontWeight:400,color:C.textMuted}}>Multi-agent results will appear here</span>
+              <span style={{fontSize:'clamp(14px,1.1vw,16px)',fontWeight:400,color:C.textMuted}}>Multi-agent results will appear here</span>
             </div>
           </div>
         )}
@@ -160,8 +160,8 @@ export default function Phase2() {
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
                 <div style={{width:28,height:28,borderRadius:8,background:'rgba(96,165,250,0.15)',border:'1px solid rgba(96,165,250,0.35)',display:'flex',alignItems:'center',justifyContent:'center',color:'#93c5fd',fontSize:13,fontWeight:800,flexShrink:0}}>1</div>
                 <div>
-                  <div style={{color:C.text,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>Supervisor assessed the ward</div>
-                  <div style={{color:C.textMuted,fontSize:'clamp(11px,0.9vw,13px)'}}>All 3 patient states aggregated → ward severity derived</div>
+                  <div style={{color:C.text,fontSize:'clamp(15px,1.2vw,17px)',fontWeight:600}}>Supervisor assessed the ward</div>
+                  <div style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>All 3 patient states aggregated → ward severity derived</div>
                 </div>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
@@ -187,8 +187,8 @@ export default function Phase2() {
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
                 <div style={{width:28,height:28,borderRadius:8,background:'rgba(56,189,248,0.12)',border:'1px solid rgba(56,189,248,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#38bdf8',fontSize:13,fontWeight:800,flexShrink:0}}>2</div>
                 <div>
-                  <div style={{color:C.text,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>Supervisor chose action</div>
-                  <div style={{color:C.textMuted,fontSize:'clamp(11px,0.9vw,13px)'}}>Q-table policy from 3000 training episodes</div>
+                  <div style={{color:C.text,fontSize:'clamp(15px,1.2vw,17px)',fontWeight:600}}>Supervisor chose action</div>
+                  <div style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>Q-table policy from 3000 training episodes</div>
                 </div>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
@@ -203,7 +203,7 @@ export default function Phase2() {
                   </div>
                   {result.supervisor.override_target!==null&&(
                     <div style={{background:'rgba(192,132,252,0.1)',border:'1px solid rgba(192,132,252,0.3)',borderRadius:8,padding:'8px 12px'}}>
-                      <span style={{color:'#c084fc',fontSize:'clamp(12px,1vw,14px)',fontWeight:600}}>⚡ Overrode Patient {result.supervisor.override_target+1} — forced stronger action</span>
+                      <span style={{color:'#c084fc',fontSize:'clamp(14px,1.1vw,16px)',fontWeight:600}}>⚡ Overrode Patient {result.supervisor.override_target+1} — forced stronger action</span>
                     </div>
                   )}
                 </div>
@@ -218,9 +218,9 @@ export default function Phase2() {
                       {probs.map((p,w)=>p>0&&(
                         <div key={w} style={{display:'flex',alignItems:'center',gap:7}}>
                           <div style={{width:'clamp(60px,7vw,80px)',background:'#081020',borderRadius:3,height:4,flexShrink:0}}><div style={{width:`${p*100}%`,height:'100%',background:WARD_PROB_COLORS[w],borderRadius:3}}/></div>
-                          <span style={{color:C.textMuted,fontSize:11,fontFamily:'JetBrains Mono,monospace',width:26}}>{(p*100).toFixed(0)}%</span>
+                          <span style={{color:C.textMuted,fontSize:14,fontFamily:'JetBrains Mono,monospace',width:26}}>{(p*100).toFixed(0)}%</span>
                           <WardBadge w={w}/>
-                          {w===result.supervisor.next_ward_state&&<span style={{color:WARD_PROB_COLORS[w],fontSize:10,fontWeight:600}}>← occurred</span>}
+                          {w===result.supervisor.next_ward_state&&<span style={{color:WARD_PROB_COLORS[w],fontSize:13,fontWeight:600}}>← occurred</span>}
                         </div>
                       ))}
                     </div>
@@ -234,8 +234,8 @@ export default function Phase2() {
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
                 <div style={{width:28,height:28,borderRadius:8,background:'rgba(74,222,128,0.12)',border:'1px solid rgba(74,222,128,0.3)',display:'flex',alignItems:'center',justifyContent:'center',color:'#4ade80',fontSize:13,fontWeight:800,flexShrink:0}}>3</div>
                 <div>
-                  <div style={{color:C.text,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>Patient outcomes</div>
-                  <div style={{color:C.textMuted,fontSize:'clamp(11px,0.9vw,13px)'}}>Each Triage Agent executed — overridden agents used Supervisor's forced action</div>
+                  <div style={{color:C.text,fontSize:'clamp(15px,1.2vw,17px)',fontWeight:600}}>Patient outcomes</div>
+                  <div style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>Each Triage Agent executed — overridden agents used Supervisor's forced action</div>
                 </div>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
@@ -248,7 +248,7 @@ export default function Phase2() {
                     <div key={i} style={{background:'#060d1a',border:`1.5px solid ${isOvr?'rgba(192,132,252,0.45)':C.cardBorder}`,borderRadius:10,padding:'clamp(12px,1.2vw,16px)'}}>
                       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
                         <div className="t-label">Patient {i+1}</div>
-                        {isOvr&&<span style={{background:'rgba(192,132,252,0.12)',color:'#c084fc',border:'1px solid rgba(192,132,252,0.35)',borderRadius:20,padding:'2px 9px',fontSize:'clamp(10px,0.85vw,12px)',fontWeight:700}}>⚡ Overridden</span>}
+                        {isOvr&&<span style={{background:'rgba(192,132,252,0.12)',color:'#c084fc',border:'1px solid rgba(192,132,252,0.35)',borderRadius:20,padding:'2px 9px',fontSize:'clamp(13px,1vw,15px)',fontWeight:700}}>⚡ Overridden</span>}
                       </div>
                       <div style={{display:'flex',alignItems:'center',gap:7,flexWrap:'wrap',marginBottom:12}}>
                         <StateBadge state={t.state}/>
@@ -258,15 +258,15 @@ export default function Phase2() {
                         <StateBadge state={t.next_state}/>
                       </div>
                       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',background:imp?'rgba(74,222,128,0.08)':wor?'rgba(251,113,133,0.08)':'rgba(255,255,255,0.02)',border:`1px solid ${imp?'rgba(74,222,128,0.25)':wor?'rgba(251,113,133,0.25)':'rgba(255,255,255,0.06)'}`,borderRadius:8,padding:'8px 12px'}}>
-                        <span style={{color:imp?'#4ade80':wor?'#fb7185':'#4a6080',fontSize:'clamp(12px,1vw,14px)',fontWeight:700}}>{imp?'↑ Improved':wor?'↓ Worsened':'→ Unchanged'}</span>
+                        <span style={{color:imp?'#4ade80':wor?'#fb7185':'#4a6080',fontSize:'clamp(14px,1.1vw,16px)',fontWeight:700}}>{imp?'↑ Improved':wor?'↓ Worsened':'→ Unchanged'}</span>
                         <div style={{display:'flex',gap:14}}>
                           <div style={{textAlign:'right'}}>
                             <div className="t-label" style={{marginBottom:1}}>Prob</div>
-                            <div style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(13px,1.1vw,15px)'}}>{prob!==null?`${(prob*100).toFixed(0)}%`:'—'}</div>
+                            <div style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(15px,1.2vw,17px)'}}>{prob!==null?`${(prob*100).toFixed(0)}%`:'—'}</div>
                           </div>
                           <div style={{textAlign:'right'}}>
                             <div className="t-label" style={{marginBottom:1}}>Reward</div>
-                            <div style={{color:t.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(13px,1.1vw,15px)'}}>{t.reward>0?'+':''}{t.reward.toFixed(1)}</div>
+                            <div style={{color:t.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(15px,1.2vw,17px)'}}>{t.reward>0?'+':''}{t.reward.toFixed(1)}</div>
                           </div>
                         </div>
                       </div>
@@ -282,7 +282,7 @@ export default function Phase2() {
                   <div style={{width:7,height:7,borderRadius:'50%',background:'#2563eb',boxShadow:'0 0 8px rgba(37,99,235,0.7)'}}/>
                   <div className="t-label">Claude Ward Report</div>
                 </div>
-                <p style={{color:C.textSec,fontSize:'clamp(13px,1.1vw,15px)',lineHeight:1.75}}>{result.ward_report}</p>
+                <p style={{color:C.textSec,fontSize:'clamp(15px,1.2vw,17px)',lineHeight:1.75}}>{result.ward_report}</p>
               </div>
             )}
           </div>
@@ -294,7 +294,7 @@ export default function Phase2() {
             <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
               <div>
                 <div className="t-label" style={{marginBottom:4}}>Episode Timeline</div>
-                <div style={{color:C.textSec,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600}}>
+                <div style={{color:C.textSec,fontSize:'clamp(15px,1.2vw,17px)',fontWeight:600}}>
                   {episodeRunning?`Running · step ${episodeSteps.length}`:`${episodeSteps.length} steps`}
                   {episodeDone&&episodeSteps[episodeSteps.length-1]?.triage_agents.every(t=>t.next_state===0)&&<span style={{color:'#4ade80',marginLeft:8}}>· Ward stabilized ✓</span>}
                 </div>
@@ -351,9 +351,9 @@ export default function Phase2() {
                               <WardActionBadge action={sup.action}/>
                               <span style={{color:C.textDim}}>→</span>
                               <WardBadge w={sup.next_ward_state}/>
-                              {wpr!==null&&<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:12,fontWeight:700}}>{(wpr*100).toFixed(0)}%</span>}
+                              {wpr!==null&&<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:14,fontWeight:700}}>{(wpr*100).toFixed(0)}%</span>}
                             </div>
-                            {sup.override_target!==null&&<span style={{background:'rgba(192,132,252,0.1)',color:'#c084fc',border:'1px solid rgba(192,132,252,0.3)',borderRadius:20,padding:'2px 8px',fontSize:11,fontWeight:700,width:'fit-content'}}>⚡ Forced P{sup.override_target+1} to escalate</span>}
+                            {sup.override_target!==null&&<span style={{background:'rgba(192,132,252,0.1)',color:'#c084fc',border:'1px solid rgba(192,132,252,0.3)',borderRadius:20,padding:'2px 8px',fontSize:14,fontWeight:700,width:'fit-content'}}>⚡ Forced P{sup.override_target+1} to escalate</span>}
                           </div>
                         </td>
                         {s.triage_agents.map((t,j)=>{
@@ -365,18 +365,18 @@ export default function Phase2() {
                               <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'nowrap'}}>
                                 <StateBadge state={t.state}/>
                                 <span style={{color:C.textDim}}>→</span>
-                                <span style={{padding:'2px 7px',borderRadius:5,fontSize:'clamp(10px,0.85vw,12px)',fontWeight:700,fontFamily:'DM Sans,sans-serif',whiteSpace:'nowrap',background:t.overridden?'rgba(192,132,252,0.12)':'rgba(255,255,255,0.03)',color:t.overridden?'#c084fc':'#4a6080',border:`1px solid ${t.overridden?'rgba(192,132,252,0.4)':'rgba(255,255,255,0.07)'}`}}>A{t.action}{t.overridden?'⚡':''}</span>
+                                <span style={{padding:'2px 7px',borderRadius:5,fontSize:'clamp(13px,1vw,15px)',fontWeight:700,fontFamily:'DM Sans,sans-serif',whiteSpace:'nowrap',background:t.overridden?'rgba(192,132,252,0.12)':'rgba(255,255,255,0.03)',color:t.overridden?'#c084fc':'#4a6080',border:`1px solid ${t.overridden?'rgba(192,132,252,0.4)':'rgba(255,255,255,0.07)'}`}}>A{t.action}{t.overridden?'⚡':''}</span>
                                 <span style={{color:C.textDim}}>→</span>
                                 <StateBadge state={t.next_state}/>
-                                {prob!==null&&<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:12,fontWeight:700}}>{(prob*100).toFixed(0)}%</span>}
-                                <span style={{color:imp?'#4ade80':wor?'#fb7185':C.textMuted,fontSize:12,fontWeight:700}}>{imp?'↑':wor?'↓':'='}</span>
+                                {prob!==null&&<span style={{color:'#93c5fd',fontFamily:'JetBrains Mono,monospace',fontSize:14,fontWeight:700}}>{(prob*100).toFixed(0)}%</span>}
+                                <span style={{color:imp?'#4ade80':wor?'#fb7185':C.textMuted,fontSize:14,fontWeight:700}}>{imp?'↑':wor?'↓':'='}</span>
                               </div>
                             </td>
                           )
                         })}
                         <td style={{color:sup.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{sup.reward>0?'+':''}{sup.reward.toFixed(1)}</td>
                         <td style={{color:cum>=0?'#60a5fa':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
-                        <td><button onClick={()=>askWardExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#93c5fd',border:'1.5px solid rgba(37,99,235,0.35)',padding:'4px 12px',borderRadius:7,fontSize:'clamp(11px,0.9vw,13px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}>{llmLoading?'...':'Ask'}</button></td>
+                        <td><button onClick={()=>askWardExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#93c5fd',border:'1.5px solid rgba(37,99,235,0.35)',padding:'4px 12px',borderRadius:7,fontSize:'clamp(14px,1.1vw,16px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}>{llmLoading?'...':'Ask'}</button></td>
                       </tr>
                     )
                   })}
@@ -389,7 +389,7 @@ export default function Phase2() {
                 <div style={{width:7,height:7,borderRadius:'50%',background:'#2563eb',boxShadow:'0 0 8px rgba(37,99,235,0.7)'}}/>
                 <div className="t-label">Claude Ward Report</div>
               </div>
-              <p style={{color:'#c0d8f0',fontSize:'clamp(14px,1.2vw,16px)',lineHeight:1.75}}>{explanation}</p>
+              <p style={{color:'#c0d8f0',fontSize:'clamp(16px,1.3vw,18px)',lineHeight:1.75}}>{explanation}</p>
             </div>
           )}
           </div>

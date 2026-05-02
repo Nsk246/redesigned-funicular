@@ -46,8 +46,8 @@ export default function App() {
             </svg>
           </div>
           <div>
-            <div style={{ color:'#ffffff', fontSize:'clamp(13px,1.1vw,15px)', fontWeight:700, lineHeight:1.2 }}>Hospital Triage AI</div>
-            <div style={{ color:'#4a78b0', fontSize:'clamp(9px,0.75vw,11px)' }}>RL + LLM Multi-Agent</div>
+            <div style={{ color:'#ffffff', fontSize:'clamp(15px,1.2vw,17px)', fontWeight:700, lineHeight:1.2 }}>Hospital Triage AI</div>
+            <div style={{ color:'#4a78b0', fontSize:'clamp(12px,0.9vw,13px)' }}>RL + LLM Multi-Agent</div>
           </div>
         </div>
 
@@ -64,8 +64,8 @@ export default function App() {
         {/* Status */}
         <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(4,20,12,0.8)', border:'1px solid rgba(34,197,94,0.25)', borderRadius:20, padding:'5px 12px' }}>
           <div style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 8px #22c55e' }}/>
-          <span style={{ color:'#4ade80', fontSize:'clamp(10px,0.85vw,12px)', fontWeight:600 }}>Live</span>
-          <span style={{ color:'rgba(74,222,128,0.4)', fontSize:'clamp(10px,0.85vw,12px)', fontFamily:'JetBrains Mono,monospace' }}>{time}</span>
+          <span style={{ color:'#4ade80', fontSize:'clamp(13px,1vw,15px)', fontWeight:600 }}>Live</span>
+          <span style={{ color:'rgba(74,222,128,0.4)', fontSize:'clamp(13px,1vw,15px)', fontFamily:'JetBrains Mono,monospace' }}>{time}</span>
         </div>
       </header>
 

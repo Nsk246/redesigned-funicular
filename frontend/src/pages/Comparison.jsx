@@ -187,8 +187,8 @@ export default function Comparison() {
               <p className="text-xs text-gray-600 mb-4">Lower = healthier · 0 = all healthy</p>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={stateChartData}>
-                  <XAxis dataKey="step" tick={{fontSize:10,fill:"#6b7280"}} />
-                  <YAxis domain={[0,4]} tick={{fontSize:10,fill:"#6b7280"}} />
+                  <XAxis dataKey="step" tick={{fontSize:13,fill:"#6b7280"}} />
+                  <YAxis domain={[0,4]} tick={{fontSize:13,fill:"#6b7280"}} />
                   <Tooltip contentStyle={{background:"#111827",border:"1px solid #374151",borderRadius:"8px"}} />
                   <ReferenceLine y={0} stroke="#22c55e" strokeDasharray="3 3" />
                   <Legend wrapperStyle={{fontSize:"11px"}} />
@@ -202,8 +202,8 @@ export default function Comparison() {
               <p className="text-xs text-gray-600 mb-4">Patient improvement/worsening only — no supervisor ward reward</p>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={rewardChartData}>
-                  <XAxis dataKey="step" tick={{fontSize:10,fill:"#6b7280"}} />
-                  <YAxis tick={{fontSize:10,fill:"#6b7280"}} />
+                  <XAxis dataKey="step" tick={{fontSize:13,fill:"#6b7280"}} />
+                  <YAxis tick={{fontSize:13,fill:"#6b7280"}} />
                   <Tooltip contentStyle={{background:"#111827",border:"1px solid #374151",borderRadius:"8px"}} />
                   <ReferenceLine y={0} stroke="#374151" strokeDasharray="3 3" />
                   <Legend wrapperStyle={{fontSize:"11px"}} />

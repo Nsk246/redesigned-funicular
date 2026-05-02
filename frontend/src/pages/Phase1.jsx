@@ -37,7 +37,7 @@ function VitalInput({ label, fieldKey, value, unit, step=1, onChange }) {
   const adj = (delta) => onChange(fieldKey, parseFloat((value + delta).toFixed(1)))
   return (
     <div style={{ background:'#060d1a', border:'1.5px solid #1e3050', borderRadius:10, padding:'12px 14px' }}>
-      <div style={{ color:'#4a78b0', fontSize:'clamp(10px,0.85vw,12px)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:6 }}>{label}</div>
+      <div style={{ color:'#4a78b0', fontSize:'clamp(13px,1vw,15px)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:6 }}>{label}</div>
       <div style={{ display:'flex', alignItems:'center', gap:6 }}>
         <button onClick={() => adj(-step)} style={{ width:26, height:26, borderRadius:6, background:'#0f1f3d', border:'1px solid #1e3050', color:'#94b8d8', fontSize:16, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontWeight:600, transition:'all 0.15s' }}
           onMouseOver={e=>e.target.style.borderColor='#2563eb'} onMouseOut={e=>e.target.style.borderColor='#1e3050'}>−</button>
@@ -47,7 +47,7 @@ function VitalInput({ label, fieldKey, value, unit, step=1, onChange }) {
         <button onClick={() => adj(step)} style={{ width:26, height:26, borderRadius:6, background:'#0f1f3d', border:'1px solid #1e3050', color:'#94b8d8', fontSize:16, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontWeight:600, transition:'all 0.15s' }}
           onMouseOver={e=>e.target.style.borderColor='#2563eb'} onMouseOut={e=>e.target.style.borderColor='#1e3050'}>+</button>
       </div>
-      <div style={{ color:'#1e3050', fontSize:'clamp(10px,0.85vw,11px)', textAlign:'center', marginTop:3 }}>{unit}</div>
+      <div style={{ color:'#1e3050', fontSize:'clamp(13px,1vw,14px)', textAlign:'center', marginTop:3 }}>{unit}</div>
     </div>
   )
 }
@@ -140,7 +140,7 @@ export default function Phase1() {
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:18,flexWrap:'wrap',gap:12}}>
           <div>
             <h1 style={{color:'#ffffff',fontSize:'clamp(20px,2.2vw,28px)',fontWeight:800,letterSpacing:'-0.025em',marginBottom:4}}>Phase 1 — Single Triage Agent</h1>
-            <p style={{color:'#4a78b0',fontSize:'clamp(13px,1.1vw,15px)'}}>DQN agent learns optimal patient actions via reinforcement learning</p>
+            <p style={{color:'#4a78b0',fontSize:'clamp(15px,1.2vw,17px)'}}>DQN agent learns optimal patient actions via reinforcement learning</p>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
             {currentState!==null&&(
@@ -165,7 +165,7 @@ export default function Phase1() {
         <div style={{display:'flex',gap:4,marginBottom:16,background:'#060d1a',borderRadius:9,padding:4,width:'fit-content'}}>
           {[{id:'manual',label:'Manual Vitals'},{id:'nlp',label:'Natural Language'}].map(m=>(
             <button key={m.id} onClick={()=>setMode(m.id)} style={{
-              padding:'8px 18px',borderRadius:7,fontSize:'clamp(13px,1.1vw,15px)',fontWeight:600,
+              padding:'8px 18px',borderRadius:7,fontSize:'clamp(15px,1.2vw,17px)',fontWeight:600,
               fontFamily:'Inter,sans-serif',cursor:'pointer',border:'none',transition:'all 0.15s',
               background:mode===m.id?'linear-gradient(135deg,#2563eb,#1d4ed8)':'transparent',
               color:mode===m.id?'#fff':'#3a6090',
@@ -204,7 +204,7 @@ export default function Phase1() {
             </div>
             <div style={{textAlign:'center'}}>
               <div style={{color:'#94b8d8',fontSize:'clamp(15px,1.3vw,18px)',fontWeight:600,marginBottom:6}}>Enter vitals and run a step</div>
-              <div style={{color:'#4a78b0',fontSize:'clamp(13px,1.1vw,15px)'}}>Q-values, transition probabilities and Claude's explanation appear here</div>
+              <div style={{color:'#4a78b0',fontSize:'clamp(15px,1.2vw,17px)'}}>Q-values, transition probabilities and Claude's explanation appear here</div>
             </div>
           </div>
         )}
@@ -226,7 +226,7 @@ export default function Phase1() {
                       background:result.next_state<result.state?'rgba(74,222,128,0.14)':result.next_state>result.state?'rgba(251,113,133,0.14)':'rgba(255,255,255,0.05)',
                       color:result.next_state<result.state?'#4ade80':result.next_state>result.state?'#fb7185':'#3a6090',
                       border:`1.5px solid ${result.next_state<result.state?'rgba(74,222,128,0.4)':result.next_state>result.state?'rgba(251,113,133,0.4)':'rgba(255,255,255,0.1)'}`,
-                      padding:'5px 13px',borderRadius:20,fontSize:'clamp(12px,1vw,14px)',fontWeight:700,
+                      padding:'5px 13px',borderRadius:20,fontSize:'clamp(14px,1.1vw,16px)',fontWeight:700,
                     }}>{result.next_state<result.state?'↑ Improved':result.next_state>result.state?'↓ Worsened':'→ Unchanged'}</span>
                   </div>
                 </div>
@@ -270,7 +270,7 @@ export default function Phase1() {
                         </div>
                         <span style={{color:'#4a78b0',fontSize:'clamp(12px,1vw,13px)',fontFamily:'JetBrains Mono,monospace',width:32}}>{(p*100).toFixed(0)}%</span>
                         <StateBadge state={s}/>
-                        {s===result.next_state&&<span style={{color:PROB_COLORS[s],fontSize:'clamp(11px,0.9vw,13px)',fontWeight:600}}>← occurred</span>}
+                        {s===result.next_state&&<span style={{color:PROB_COLORS[s],fontSize:'clamp(14px,1.1vw,16px)',fontWeight:600}}>← occurred</span>}
                       </div>
                     ))}
                   </div>
@@ -282,7 +282,7 @@ export default function Phase1() {
                   <div className="t-label">Claude's Explanation</div>
                 </div>
                 {explanation
-                  ?<p style={{color:'#c0d8f0',fontSize:'clamp(14px,1.2vw,16px)',lineHeight:1.75}}>{explanation}</p>
+                  ?<p style={{color:'#c0d8f0',fontSize:'clamp(16px,1.3vw,18px)',lineHeight:1.75}}>{explanation}</p>
                   :<p style={{color:'#4a78b0',fontSize:14}}>Generating explanation...</p>}
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function Phase1() {
                         <td style={{color:s.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{s.reward>0?'+':''}{s.reward.toFixed(1)}</td>
                         <td style={{color:cum>=0?'#60a5fa':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
                         <td>
-                          <button onClick={()=>askExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#60a5fa',border:'1.5px solid rgba(37,99,235,0.35)',padding:'5px 14px',borderRadius:7,fontSize:'clamp(12px,1vw,14px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}
+                          <button onClick={()=>askExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#60a5fa',border:'1.5px solid rgba(37,99,235,0.35)',padding:'5px 14px',borderRadius:7,fontSize:'clamp(14px,1.1vw,16px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}
                             onMouseOver={e=>{if(!llmLoading)e.currentTarget.style.background='rgba(37,99,235,0.22)'}}
                             onMouseOut={e=>e.currentTarget.style.background='rgba(37,99,235,0.12)'}>
                             {llmLoading?'...':'Ask'}
@@ -359,7 +359,7 @@ export default function Phase1() {
                   <div style={{width:7,height:7,borderRadius:'50%',background:'#2563eb',boxShadow:'0 0 8px rgba(37,99,235,0.7)'}}/>
                   <div className="t-label">Claude's Explanation</div>
                 </div>
-                <p style={{color:'#c0d8f0',fontSize:'clamp(14px,1.2vw,16px)',lineHeight:1.75}}>{explanation}</p>
+                <p style={{color:'#c0d8f0',fontSize:'clamp(16px,1.3vw,18px)',lineHeight:1.75}}>{explanation}</p>
               </div>
             )}
           </div>
