@@ -377,7 +377,7 @@ export default function About() {
           <div className="t-label" style={{ marginBottom:14 }}>Actions + Legal Mask</div>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {[
-              { a:0, desc:'Observe and log vitals. No clinical intervention.',        legal:[0,1,2]   },
+              { a:0, desc:'Observe and log vitals. No clinical intervention.',        legal:[0]       },
               { a:1, desc:'Administer medication or basic treatment protocol.',        legal:[1,2]     },
               { a:2, desc:'Call doctor or specialist for immediate assessment.',       legal:[1,2,3,4] },
               { a:3, desc:'Trigger full emergency team. Highest resource cost.',       legal:[2,3,4]   },
@@ -492,7 +492,7 @@ export default function About() {
           <div className="t-label" style={{ marginBottom:14 }}>Supervisor Actions + Legal Mask</div>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {[
-              { b:0, desc:'Trust Triage Agents. No ward-level intervention.',             legal:[0,1,2]   },
+              { b:0, desc:'Trust Triage Agents. No ward-level intervention.',             legal:[0]       },
               { b:1, desc:'Move nursing staff to highest-priority patient.',              legal:[1,2,3]   },
               { b:2, desc:"Force a Triage Agent's action up one escalation level.",       legal:[2,3,4]   },
               { b:3, desc:'Call for additional staff and resources from outside.',        legal:[2,3,4]   },
