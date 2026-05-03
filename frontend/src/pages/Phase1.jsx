@@ -65,6 +65,7 @@ export default function Phase1() {
   const [episodeDone,setEpDone]  = useState(false)
   const [explanation,setExpl]    = useState(null)
   const [llmLoading,setLlmLoad]  = useState(false)
+  const [error,setError]           = useState(null)
   const stopRef = useRef(false)
 
   const updateVital = (key, val) => setVitals(v => ({...v, [key]: val}))
