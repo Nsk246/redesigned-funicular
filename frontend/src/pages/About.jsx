@@ -611,8 +611,8 @@ export default function About() {
         <div className="grid-3">
           {[
             { cat:'Backend',  color:'#67e8f9', items:['Python 3.12','FastAPI REST API','PyTorch DQN neural network','NumPy Q-table operations','Anthropic SDK Claude API'] },
-            { cat:'RL & AI',  color:'#a5b4fc', items:['Deep Q-Network (DQN)','Experience Replay Buffer','Target Network stability','Tabular Q-Learning (Supervisor)','Epsilon-greedy exploration'] },
-            { cat:'Frontend', color:'#c084fc', items:['React + Vite','TailwindCSS','Recharts visualization','Axios API calls','DM Sans + JetBrains Mono'] },
+            { cat:'RL & AI',  color:'#a5b4fc', items:['Deep Q-Network (DQN)','Experience Replay Buffer','Tabular Q-Learning (Supervisor)','Epsilon-greedy exploration','Legal Action Masking'] },
+            { cat:'Frontend', color:'#c084fc', items:['React + Vite','TailwindCSS','Recharts visualization','Axios API calls','Inter + JetBrains Mono'] },
           ].map(s => (
             <div key={s.cat} className="card">
               <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>

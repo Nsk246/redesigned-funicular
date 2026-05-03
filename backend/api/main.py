@@ -232,7 +232,7 @@ class WardExplainInput(BaseModel):
     action: int
     action_label: str
     next_ward_state: int
-    override_target: int = None
+    override_target: Optional[int] = None
     triage_agents: list = []
 
 @app.post("/api/ward-explain")
