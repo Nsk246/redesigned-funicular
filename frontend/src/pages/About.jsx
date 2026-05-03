@@ -121,6 +121,8 @@ export default function About() {
   const [triageState,     setTriageState]     = useState(2)
   const [metrics, setMetrics] = useState(null)
 
+  const [supervisorState, setSupervisorState] = useState(2)
+  const [demoVitals, setDemoVitals] = useState({ hr:134, bp_sys:182, bp_dia:110, temp:39.4, spo2:89, age:67, conditions:2 })
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
@@ -132,8 +134,6 @@ export default function About() {
     const interval = setInterval(fetchMetrics, 10000) // refresh every 10s
     return () => clearInterval(interval)
   }, [])
-  const [supervisorState, setSupervisorState] = useState(2)
-  const [demoVitals, setDemoVitals] = useState({ hr:134, bp_sys:182, bp_dia:110, temp:39.4, spo2:89, age:67, conditions:2 })
 
   const vitalScores = {
     hr:    scoreVital('hr',    demoVitals.hr),
