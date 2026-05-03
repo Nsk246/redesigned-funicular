@@ -185,7 +185,7 @@ export default function Phase1() {
             </button>
           </div>
         ):(
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(120px,1fr))',gap:8}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:10}}>
             {FIELDS.map(f=>(
               <VitalInput key={f.key} label={f.label} fieldKey={f.key} value={vitals[f.key]} unit={f.unit} step={f.step} onChange={updateVital}/>
             ))}
