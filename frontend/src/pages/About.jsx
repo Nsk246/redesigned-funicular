@@ -115,11 +115,12 @@ function ProbTable({ data, isWard=false }) {
 
 // Vital scoring helper mirrors backend logic
 function scoreVital(key, val) {
+  // Matches state_mapper.py exactly — cumulative scoring
   const scores = {
-    hr:   val > 140 ? 4 : val > 120 ? 3 : val > 100 ? 2 : val > 60 ? 0 : 1,
-    bp_sys: val > 180 ? 4 : val > 160 ? 3 : val > 140 ? 2 : val >= 90 ? 0 : 2,
-    spo2: val < 85 ? 4 : val < 88 ? 3 : val < 92 ? 2 : val < 95 ? 1 : 0,
-    temp: val > 40 ? 4 : val > 39 ? 3 : val > 38 ? 2 : val >= 36 ? 0 : 1,
+    hr:     val > 140 || val < 40  ? 3 : val > 120 || val < 50 ? 2 : val > 100 || val < 60 ? 1 : 0,
+    bp_sys: val > 180 || val < 80  ? 3 : val > 160 || val < 90 ? 2 : val > 140 || val < 100 ? 1 : 0,
+    spo2:   val < 88 ? 3 : val < 92 ? 2 : val < 95 ? 1 : 0,
+    temp:   val > 40 || val < 35   ? 3 : val > 39 || val < 36  ? 2 : val > 38 ? 1 : 0,
   }
   return scores[key] ?? 0
 }
@@ -135,8 +136,8 @@ export default function About() {
     spo2:  scoreVital('spo2',  demoVitals.spo2),
     temp:  scoreVital('temp',  demoVitals.temp),
   }
-  const maxScore = Math.max(...Object.values(vitalScores))
-  const mappedState = maxScore
+  const totalScore = Object.values(vitalScores).reduce((a,b)=>a+b, 0)
+  const mappedState = totalScore === 0 ? 0 : totalScore <= 2 ? 1 : totalScore <= 5 ? 2 : totalScore <= 8 ? 3 : 4
 
   return (
     <div style={{ maxWidth:960, margin:'0 auto', display:'flex', flexDirection:'column', gap:'clamp(40px,5vw,64px)', paddingBottom:80 }}>
@@ -194,37 +195,41 @@ export default function About() {
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:10, fontSize:'clamp(13px,1vw,15px)', color:'#4a6080', fontFamily:'JetBrains Mono,monospace', lineHeight:1.8 }}>
               <div>
                 <div style={{ color:'#60a5fa', fontWeight:700, marginBottom:4 }}>Heart Rate</div>
-                <div>&gt;140 → score 4 (Emergency)</div>
-                <div>&gt;120 → score 3 (Critical)</div>
-                <div>&gt;100 → score 2 (Unstable)</div>
-                <div>60–100 → score 0 (Healthy)</div>
+                <div>&gt;140 or &lt;40 → +3</div>
+                <div>&gt;120 or &lt;50 → +2</div>
+                <div>&gt;100 or &lt;60 → +1</div>
+                <div>60–100 → +0</div>
               </div>
               <div>
                 <div style={{ color:'#60a5fa', fontWeight:700, marginBottom:4 }}>BP Systolic</div>
-                <div>&gt;180 → score 4 (Emergency)</div>
-                <div>&gt;160 → score 3 (Critical)</div>
-                <div>&gt;140 → score 2 (Unstable)</div>
-                <div>90–140 → score 0 (Healthy)</div>
+                <div>&gt;180 or &lt;80 → +3</div>
+                <div>&gt;160 or &lt;90 → +2</div>
+                <div>&gt;140 or &lt;100 → +1</div>
+                <div>100–140 → +0</div>
               </div>
               <div>
                 <div style={{ color:'#60a5fa', fontWeight:700, marginBottom:4 }}>SpO2</div>
-                <div>&lt;85% → score 4 (Emergency)</div>
-                <div>&lt;88% → score 3 (Critical)</div>
-                <div>&lt;92% → score 2 (Unstable)</div>
-                <div>&lt;95% → score 1 (At Risk)</div>
-                <div>≥95% → score 0 (Healthy)</div>
+                <div>&lt;88% → +3</div>
+                <div>&lt;92% → +2</div>
+                <div>&lt;95% → +1</div>
+                <div>≥95% → +0</div>
               </div>
               <div>
                 <div style={{ color:'#60a5fa', fontWeight:700, marginBottom:4 }}>Temperature</div>
-                <div>&gt;40°C → score 4 (Emergency)</div>
-                <div>&gt;39°C → score 3 (Critical)</div>
-                <div>&gt;38°C → score 2 (Unstable)</div>
-                <div>36–38°C → score 0 (Healthy)</div>
+                <div>&gt;40°C or &lt;35°C → +3</div>
+                <div>&gt;39°C or &lt;36°C → +2</div>
+                <div>&gt;38°C → +1</div>
+                <div>36–38°C → +0</div>
+              </div>
+              <div>
+                <div style={{ color:'#60a5fa', fontWeight:700, marginBottom:4 }}>Risk Modifiers</div>
+                <div>Age &gt;70 → +1</div>
+                <div>Conditions ≥2 → +1</div>
               </div>
             </div>
             <div style={{ marginTop:12, background:'rgba(96,165,250,0.06)', border:'1px solid rgba(96,165,250,0.15)', borderRadius:8, padding:'10px 12px' }}>
               <span style={{ color:'#60a5fa', fontWeight:600, fontSize:'clamp(14px,1.1vw,16px)' }}>Rule: </span>
-              <span style={{ color:'#8099b8', fontSize:'clamp(14px,1.1vw,16px)' }}>Final state = maximum score across all vitals. One critical vital is enough to classify the patient as critical.</span>
+              <span style={{ color:'#8099b8', fontSize:'clamp(14px,1.1vw,16px)' }}>Final state = sum of all vital scores + risk modifiers. Total 0→S0, 1-2→S1, 3-5→S2, 6-8→S3, 9+→S4</span>
             </div>
           </div>
 
@@ -243,7 +248,7 @@ export default function About() {
               })}
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <span style={{ color:'#4a6080', fontSize:'clamp(12px,1.1vw,14px)' }}>max score {maxScore}</span>
+              <span style={{ color:'#4a6080', fontSize:'clamp(12px,1.1vw,14px)' }}>total score {totalScore}</span>
               <span style={{ color:'#4a6080', fontSize:18 }}>→</span>
               <StateBadge state={mappedState} />
             </div>
