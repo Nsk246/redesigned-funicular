@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import RewardChart from '../components/RewardChart'
 import StateBadge from '../components/StateBadge'
 import { ActionBadge, WardActionBadge } from '../components/ActionBadge'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const TRIAGE_TRANSITIONS = {
   0:[{id:'A0',name:'Monitor',   probs:[0.85,0.12,0.03,0.00,0.00]}],
@@ -109,24 +113,22 @@ function ProbTable({ data, isWard=false }) {
           </div>
         </div>
       ))}
-    </div>
-  )
-}
-
-// Vital scoring helper mirrors backend logic
-function scoreVital(key, val) {
-  // Matches state_mapper.py exactly — cumulative scoring
-  const scores = {
-    hr:     val > 140 || val < 40  ? 3 : val > 120 || val < 50 ? 2 : val > 100 || val < 60 ? 1 : 0,
-    bp_sys: val > 180 || val < 80  ? 3 : val > 160 || val < 90 ? 2 : val > 140 || val < 100 ? 1 : 0,
-    spo2:   val < 88 ? 3 : val < 92 ? 2 : val < 95 ? 1 : 0,
-    temp:   val > 40 || val < 35   ? 3 : val > 39 || val < 36  ? 2 : val > 38 ? 1 : 0,
-  }
-  return scores[key] ?? 0
-}
 
 export default function About() {
   const [triageState,     setTriageState]     = useState(2)
+  const [metrics, setMetrics] = useState(null)
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const r = await axios.get(`${API}/api/metrics`)
+        setMetrics(r.data)
+      } catch(e) { /* silently fail */ }
+    }
+    fetchMetrics()
+    const interval = setInterval(fetchMetrics, 10000) // refresh every 10s
+    return () => clearInterval(interval)
+  }, [])
   const [supervisorState, setSupervisorState] = useState(2)
   const [demoVitals, setDemoVitals] = useState({ hr:134, bp_sys:182, bp_dia:110, temp:39.4, spo2:89, age:67, conditions:2 })
 
@@ -615,6 +617,42 @@ export default function About() {
           ))}
         </div>
       </Section>
+
+
+      {/* Live Reward Charts */}
+      <section style={{ display:'flex', flexDirection:'column', gap:'clamp(14px,1.4vw,20px)' }}>
+        <div style={{ borderLeft:'3px solid #2563eb', paddingLeft:'clamp(10px,1vw,14px)' }}>
+          <h2 style={{ color:'#f0f8ff', fontSize:'clamp(16px,1.6vw,22px)', fontWeight:700, letterSpacing:'-0.02em', marginBottom:4 }}>Live Performance</h2>
+          <p style={{ color:'#3a6090', fontSize:'clamp(11px,0.95vw,13px)' }}>Reward history from the current session — run steps or episodes to populate</p>
+        </div>
+        <div className="grid-2">
+          <RewardChart
+            rewards={metrics?.triage?.episode_rewards || []}
+            title="Triage Agent — Session Rewards"
+            color="#60a5fa"
+          />
+          <RewardChart
+            rewards={metrics?.supervisor?.episode_rewards || []}
+            title="Supervisor Agent — Session Rewards"
+            color="#a78bfa"
+          />
+        </div>
+        {metrics && (
+          <div className="grid-2">
+            {[
+              { label:'Triage Total Reward',     val: metrics.triage.total_reward,     color:'#60a5fa' },
+              { label:'Triage Steps',             val: metrics.triage.steps,            color:'#60a5fa' },
+              { label:'Supervisor Total Reward',  val: metrics.supervisor.total_reward, color:'#a78bfa' },
+              { label:'Supervisor Overrides',     val: metrics.supervisor.override_count, color:'#a78bfa' },
+            ].map(s => (
+              <div key={s.label} className="stat-card">
+                <div className="t-label" style={{ marginBottom:6 }}>{s.label}</div>
+                <div className="stat-val" style={{ color:s.color }}>{s.val}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
     </div>
   )
