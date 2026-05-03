@@ -5,9 +5,8 @@ A hybrid Reinforcement Learning and LLM multi-agent system for intelligent patie
 ## Live Demo
 
 The application is deployed and accessible without any local setup:
+https://delightful-learning-production-7606.up.railway.app
 
-- Frontend: https://delightful-learning-production-7606.up.railway.app
-- Backend API: https://redesigned-funicular-production.up.railway.app/docs
 
 ---
 
@@ -36,7 +35,7 @@ The application is deployed and accessible without any local setup:
 - Strictly separated from RL logic — LLM never selects actions or sees Q-values
 
 ---
-
+```
 ## Project Structure
 hospital-triage-agent/
 ├── backend/
@@ -72,7 +71,7 @@ hospital-triage-agent/
 │   │   └── App.jsx
 │   └── package.json
 └── README.md
-
+```
 ---
 
 ## MDP Design
