@@ -126,7 +126,7 @@ export default function Phase2() {
         </div>
 
         {/* Patient state selectors */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:8}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
           {patientStates.map((s,i)=>(
             <div key={i} style={{background:C.card,border:`1.5px solid ${C.cardBorder}`,borderRadius:8,padding:'12px 14px'}}>
               <div style={{color:C.textMuted,fontSize:'clamp(13px,1vw,15px)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>Patient {i+1}</div>
@@ -238,7 +238,7 @@ export default function Phase2() {
                   <div style={{color:C.textMuted,fontSize:'clamp(14px,1.1vw,16px)'}}>Each Triage Agent executed — overridden agents used Supervisor's forced action</div>
                 </div>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:8}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
                 {result.triage_agents.map((t,i)=>{
                   const probs=TRIAGE_PROBS[`${t.state}-${t.action}`]
                   const prob=probs?probs[t.next_state]:null
