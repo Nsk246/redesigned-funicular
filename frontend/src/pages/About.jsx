@@ -117,6 +117,16 @@ function ProbTable({ data, isWard=false }) {
   )
 }
 
+function scoreVital(key, val) {
+  const scores = {
+    hr:     val > 140 || val < 40  ? 3 : val > 120 || val < 50 ? 2 : val > 100 || val < 60 ? 1 : 0,
+    bp_sys: val > 180 || val < 80  ? 3 : val > 160 || val < 90 ? 2 : val > 140 || val < 100 ? 1 : 0,
+    spo2:   val < 88 ? 3 : val < 92 ? 2 : val < 95 ? 1 : 0,
+    temp:   val > 40 || val < 35   ? 3 : val > 39 || val < 36  ? 2 : val > 38 ? 1 : 0,
+  }
+  return scores[key] ?? 0
+}
+
 export default function About() {
   const [triageState,     setTriageState]     = useState(2)
   const [metrics, setMetrics] = useState(null)
