@@ -17,6 +17,7 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
+from collections import deque
 import random
 import os
 import sys
@@ -114,7 +115,7 @@ class TriageAgent:
         self.memory    = ReplayBuffer(capacity=10000, state_dim=5)
 
         self.total_reward    = 0.0
-        self.episode_rewards = []
+        self.episode_rewards = deque(maxlen=500)
         self.current_state   = 0
         self.last_action     = None
         self.last_transition = None

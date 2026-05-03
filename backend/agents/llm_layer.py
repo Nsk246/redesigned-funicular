@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '../../.env'))
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"), timeout=30.0)
 MODEL  = "claude-haiku-4-5-20251001"
 
 STATE_NAMES  = ['Healthy','At Risk','Unstable','Critical','Emergency']
@@ -41,6 +41,7 @@ Return exactly this JSON with no other text:
         max_tokens=200,
         messages=[{"role": "user", "content": prompt}]
     )
+    if not message.content: return "{}"
     raw = message.content[0].text.strip()
     if '```' in raw:
         raw = re.sub(r'```(?:json)?\s*', '', raw).replace('```', '').strip()
@@ -86,6 +87,7 @@ Do NOT mention: rewards, Q-values, AI, machine learning, algorithms, or scores."
         max_tokens=160,
         messages=[{"role": "user", "content": prompt}]
     )
+    if not message.content: return "Explanation unavailable."
     return message.content[0].text.strip()
 
 
@@ -142,4 +144,5 @@ Do NOT mention: rewards, Q-values, AI, machine learning, algorithms, or scores."
         max_tokens=220,
         messages=[{"role": "user", "content": prompt}]
     )
+    if not message.content: return "Explanation unavailable."
     return message.content[0].text.strip()

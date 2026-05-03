@@ -23,6 +23,12 @@ Ward States:
 def vitals_to_state(hr: float, bp_sys: float, bp_dia: float,
                     temp: float, spo2: float, age: int,
                     conditions: int) -> int:
+    # Clamp vitals to clinically valid ranges
+    hr       = max(20,  min(250, hr))
+    bp_sys   = max(50,  min(250, bp_sys))
+    bp_dia   = max(20,  min(160, bp_dia))
+    temp     = max(30.0,min(43.0, temp))
+    spo2     = max(50,  min(100, spo2))
     """
     Maps patient vitals to a discrete state ID (0-4).
 

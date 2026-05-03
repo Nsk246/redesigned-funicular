@@ -2,7 +2,7 @@ const A = {
   0: { label:'Monitor'   },
   1: { label:'Treat'     },
   2: { label:'Escalate'  },
-  3: { label:'Emergency' },
+  3: { label:'Emergency Response' },
 }
 const B = {
   0: { label:'Standby'    },

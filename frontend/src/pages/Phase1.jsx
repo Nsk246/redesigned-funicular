@@ -70,13 +70,13 @@ export default function Phase1() {
   const updateVital = (key, val) => setVitals(v => ({...v, [key]: val}))
 
   const FIELDS = [
-    {key:'hr',        label:'Heart Rate',   unit:'bpm',  step:1  },
-    {key:'bp_sys',    label:'BP Systolic',  unit:'mmHg', step:1  },
-    {key:'bp_dia',    label:'BP Diastolic', unit:'mmHg', step:1  },
-    {key:'temp',      label:'Temperature',  unit:'°C',   step:0.1},
-    {key:'spo2',      label:'SpO2',         unit:'%',    step:1  },
-    {key:'age',       label:'Age',          unit:'yrs',  step:1  },
-    {key:'conditions',label:'Conditions',   unit:'#',    step:1  },
+    {key:'hr',        label:'Heart Rate',   unit:'bpm',  step:1,   min:20,  max:250},
+    {key:'bp_sys',    label:'BP Systolic',  unit:'mmHg', step:1,   min:50,  max:250},
+    {key:'bp_dia',    label:'BP Diastolic', unit:'mmHg', step:1,   min:20,  max:160},
+    {key:'temp',      label:'Temperature',  unit:'°C',   step:0.1, min:30,  max:43 },
+    {key:'spo2',      label:'SpO2',         unit:'%',    step:1,   min:50,  max:100},
+    {key:'age',       label:'Age',          unit:'yrs',  step:1,   min:0,   max:120},
+    {key:'conditions',label:'Conditions',   unit:'#',    step:1,   min:0,   max:10 },
   ]
 
   async function parseNLP() {
@@ -85,7 +85,7 @@ export default function Phase1() {
     try {
       const r = await axios.post(`${API}/api/parse-patient`,{text:nlpText})
       setVitals(r.data.vitals); setState(r.data.state); setExpl(null)
-    } catch(e){alert(e.message)} finally{setParsing(false)}
+    } catch(e){setError(e.response?.data?.detail||e.message)} finally{setParsing(false)}
   }
   async function mapState() {
     setLoading(true)
@@ -98,7 +98,7 @@ export default function Phase1() {
     try {
       const r=await axios.post(`${API}/api/triage-step`,{state:currentState,use_llm:true})
       setResult(r.data); setState(r.data.next_state); setExpl(r.data.explanation)
-    } catch(e){alert(e.message)} finally{setLoading(false)}
+    } catch(e){setError(e.response?.data?.detail||e.message)} finally{setLoading(false)}
   }
   async function runEpisode() {
     if(currentState===null) return
@@ -111,7 +111,7 @@ export default function Phase1() {
         setEpSteps(p=>[...p,{...r.data,stepNum:i+1}]); setState(r.data.next_state); state=r.data.next_state
         if(state===0) break
         await new Promise(r=>setTimeout(r,500))
-      } catch(e){alert(e.message);break}
+      } catch(e){setError(e.response?.data?.detail||e.message);break}
     }
     setEpRun(false); setEpDone(true)
   }
@@ -124,7 +124,7 @@ export default function Phase1() {
         next_state:step.next_state, next_state_label:STATE_LABELS[step.next_state], overridden:false,
       })
       setExpl(r.data.explanation)
-    } catch(e){alert(e.message)} finally{setLlmLoad(false)}
+    } catch(e){setError(e.response?.data?.detail||e.message)} finally{setLlmLoad(false)}
   }
 
   const maxQ       = result?Math.max(...Object.values(result.q_values).filter(v=>v!==null).map(Math.abs)):1
@@ -196,6 +196,12 @@ export default function Phase1() {
       {/* RESULTS */}
       <div style={{flex:1,padding:'clamp(10px,1.8vw,24px) clamp(10px,2.5vw,36px)',display:'flex',flexDirection:'column',gap:'clamp(14px,1.4vw,20px)'}}>
 
+        {error&&(
+          <div style={{background:'rgba(251,113,133,0.1)',border:'1.5px solid rgba(251,113,133,0.4)',borderRadius:10,padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}>
+            <span style={{color:'#fda4af',fontSize:'clamp(13px,1.1vw,15px)'}}>{error}</span>
+            <button onClick={()=>setError(null)} style={{background:'transparent',border:'none',color:'#fda4af',cursor:'pointer',fontSize:18,lineHeight:1}}>×</button>
+          </div>
+        )}
         {/* Empty */}
         {!result&&!episodeSteps.length&&(
           <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'80px 0',opacity:0.45}}>
@@ -297,7 +303,7 @@ export default function Phase1() {
                 <div className="t-label" style={{marginBottom:5}}>Episode Timeline</div>
                 <div style={{color:'#f0f8ff',fontSize:'clamp(14px,1.2vw,17px)',fontWeight:600}}>
                   {episodeRunning?`Running · step ${episodeSteps.length}`:`${episodeSteps.length} steps completed`}
-                  {episodeDone&&episodeSteps[episodeSteps.length-1]?.next_state===0&&
+                  {episodeDone&&episodeSteps.some(s=>s.next_state===0)&&
                     <span style={{color:'#4ade80',marginLeft:10}}>· Patient reached Healthy ✓</span>}
                 </div>
               </div>

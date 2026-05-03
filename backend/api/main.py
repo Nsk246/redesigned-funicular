@@ -137,6 +137,8 @@ def supervisor_step(body: SupervisorStepInput):
     """Run one full Phase 2 step (Supervisor + all Triage Agents)."""
     if len(body.patient_states) != 3:
         raise HTTPException(status_code=400, detail="Must provide exactly 3 patient states")
+        if not all(isinstance(s, int) and 0 <= s <= 4 for s in body.patient_states):
+            raise HTTPException(status_code=400, detail="Each patient state must be an integer 0-4")
     try:
         # Snapshot patient states BEFORE actions run
         states_before = list(body.patient_states)

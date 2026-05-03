@@ -3,6 +3,7 @@ supervisor_agent.py — fixed NaN override target bug
 """
 
 import numpy as np
+from collections import deque
 import os
 import sys
 
