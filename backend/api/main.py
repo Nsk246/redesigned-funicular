@@ -206,13 +206,13 @@ def get_metrics():
             "total_reward": round(triage_agent.total_reward, 2),
             "epsilon": round(triage_agent.epsilon, 3),
             "steps": triage_agent.steps,
-            "episode_rewards": triage_agent.episode_rewards[-50:]
+            "episode_rewards": list(triage_agent.episode_rewards)[-50:]
         },
         "supervisor": {
             "total_reward": round(supervisor_agent.total_reward, 2),
             "epsilon": round(supervisor_agent.q_table.epsilon, 3),
             "override_count": supervisor_agent.override_count,
-            "episode_rewards": supervisor_agent.episode_rewards[-50:]
+            "episode_rewards": list(supervisor_agent.episode_rewards)[-50:]
         }
     }
 
