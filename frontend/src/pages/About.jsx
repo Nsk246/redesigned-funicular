@@ -113,6 +113,9 @@ function ProbTable({ data, isWard=false }) {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
 
 export default function About() {
   const [triageState,     setTriageState]     = useState(2)
