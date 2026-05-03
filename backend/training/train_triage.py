@@ -32,7 +32,6 @@ for ep in range(EPISODES):
         state = next_state
 
     all_rewards.append(ep_reward)
-    agent.episode_rewards.append(ep_reward)
 
     if (ep + 1) % 100 == 0:
         avg = np.mean(all_rewards[-100:])

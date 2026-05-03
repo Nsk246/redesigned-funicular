@@ -26,7 +26,7 @@ import numpy as np
 from agents.triage_agent import TriageAgent
 from agents.supervisor_agent import SupervisorAgent
 from agents.llm_layer import parse_patient_input, generate_triage_explanation, generate_ward_report
-from utils.state_mapper import vitals_to_state, patients_to_ward_state, STATE_LABELS
+from utils.state_mapper import vitals_to_state, patients_to_ward_state, STATE_LABELS, WARD_LABELS
 
 app = FastAPI(title="Hospital Triage Agent API", version="1.0.0")
 
@@ -158,12 +158,9 @@ def supervisor_step(body: SupervisorStepInput):
         actual_next_states = [t["next_state"] for t in triage_results]
         actual_next_ward   = int(patients_to_ward_state(actual_next_states))
         actual_reward = compute_ward_reward(sup_result["ward_state"], sup_result["action"], actual_next_ward)
-        # Fix #3: Q-table learns from actual transition, not sampled one
-        supervisor_agent.q_table.update(sup_result["ward_state"], sup_result["action"], actual_reward, actual_next_ward, False)
-        supervisor_agent.total_reward += actual_reward
-        supervisor_agent.episode_rewards.append(actual_reward)
+        # Q-table already updated inside step(); just patch the response with actual values
         sup_result["next_ward_state"]       = actual_next_ward
-        sup_result["next_ward_state_label"] = ["Calm","Active","Busy","Overloaded","Crisis"][actual_next_ward]
+        sup_result["next_ward_state_label"] = WARD_LABELS[actual_next_ward]
         sup_result["reward"]                = actual_reward
         sup_result["ward_state_input"]      = states_before
 
@@ -227,24 +224,33 @@ class ExplainRequest(BaseModel):
     next_state_label: str
     overridden: bool = False
 
+class WardExplainInput(BaseModel):
+    ward_state: int
+    ward_state_label: str
+    action: int
+    action_label: str
+    next_ward_state: int
+    override_target: int = None
+    triage_agents: list = []
+
 @app.post("/api/ward-explain")
-async def ward_explain(body: dict):
+async def ward_explain(body: WardExplainInput):
     """Generate Claude ward report for a specific episode step."""
     try:
         from agents.llm_layer import generate_ward_report
         # Reconstruct supervisor_result and triage_results from request
         supervisor_result = {
-            "ward_state":       body["ward_state"],
-            "ward_state_label": body["ward_state_label"],
-            "action":           body["action"],
-            "action_label":     body["action_label"],
-            "next_ward_state":  body["next_ward_state"],
-            "next_ward_state_label": ["Calm","Active","Busy","Overloaded","Crisis"][body["next_ward_state"]],
-            "override_target":  body.get("override_target"),
+            "ward_state":       body.ward_state,
+            "ward_state_label": body.ward_state_label,
+            "action":           body.action,
+            "action_label":     body.action_label,
+            "next_ward_state":  body.next_ward_state,
+            "next_ward_state_label": WARD_LABELS[body.next_ward_state],
+            "override_target":  body.override_target,
             "ward_state_input": [],
         }
         triage_results = []
-        for i, t in enumerate(body.get("triage_agents", [])):
+        for i, t in enumerate(body.triage_agents):
             triage_results.append({
                 "patient_id":   i + 1,
                 "state":        t["state"],

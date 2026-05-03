@@ -1,5 +1,6 @@
 import anthropic
 import json
+import re
 import os
 from dotenv import load_dotenv
 
@@ -42,11 +43,11 @@ Return exactly this JSON with no other text:
     )
     raw = message.content[0].text.strip()
     if '```' in raw:
-        raw = __import__('re').sub(r'```(?:json)?\s*', '', raw).replace('```', '').strip()
+        raw = re.sub(r'```(?:json)?\s*', '', raw).replace('```', '').strip()
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        match = __import__('re').search(r'\{[^{}]*\}', raw, __import__('re').DOTALL)
+        match = re.search(r'\{[^{}]*\}', raw, re.DOTALL)
         if match:
             return json.loads(match.group())
         raise

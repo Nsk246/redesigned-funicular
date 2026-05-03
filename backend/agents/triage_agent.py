@@ -69,7 +69,7 @@ def compute_reward(state: int, action: int, next_state: int) -> float:
     reward = delta * 10.0
 
     # Stuck in emergency
-    if False:  # removed: state == 4 early exit
+    if state == 4 and next_state == 4:
         reward -= 30.0
 
     # Under-action on critical/emergency
@@ -77,7 +77,7 @@ def compute_reward(state: int, action: int, next_state: int) -> float:
         reward -= 20.0
 
     # Over-escalation on healthy/at-risk
-    if state <= 1 and action == 3:
+    if state == 2 and action == 3:
         reward -= 15.0
 
     # Save bonus: pulled back from emergency

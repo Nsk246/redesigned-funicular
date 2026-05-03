@@ -232,7 +232,7 @@ export default function Phase1() {
                 </div>
                 <div style={{display:'flex',gap:10}}>
                   {[
-                    {label:'Reward',  val:`${result.reward>0?'+':''}${result.reward.toFixed(1)}`, color:result.reward>=0?'#4ade80':'#fb7185', glow:'74,222,128'},
+                    {label:'Reward',  val:`${result.reward>0?'+':''}${result.reward.toFixed(1)}`, color:result.reward>0?'#4ade80':result.reward<0?'#fb7185':'#4a6080', glow:'74,222,128'},
                     {label:'Prob',    val:transProbs?`${(transProbs[result.next_state]*100).toFixed(0)}%`:'—', color:'#60a5fa', glow:'96,165,250'},
                     {label:'Epsilon', val:result.epsilon, color:'#4a78b0', glow:null},
                   ].map(s=>(
@@ -304,7 +304,7 @@ export default function Phase1() {
               {episodeDone&&(
                 <div style={{textAlign:'right'}}>
                   <div className="t-label" style={{marginBottom:4}}>Total Reward</div>
-                  <div style={{color:totalRew>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(24px,2.4vw,32px)',fontWeight:800,letterSpacing:'-0.02em'}}>
+                  <div style={{color:totalRew>0?'#4ade80':totalRew<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(24px,2.4vw,32px)',fontWeight:800,letterSpacing:'-0.02em'}}>
                     {totalRew>0?'+':''}{totalRew.toFixed(1)}
                   </div>
                 </div>
@@ -338,8 +338,8 @@ export default function Phase1() {
                         <td><ActionBadge action={s.action}/></td>
                         <td><StateBadge state={s.next_state}/></td>
                         <td style={{color:'#60a5fa',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{prob!==null?`${(prob*100).toFixed(0)}%`:'—'}</td>
-                        <td style={{color:s.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{s.reward>0?'+':''}{s.reward.toFixed(1)}</td>
-                        <td style={{color:cum>=0?'#60a5fa':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
+                        <td style={{color:s.reward>0?'#4ade80':s.reward<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{s.reward>0?'+':''}{s.reward.toFixed(1)}</td>
+                        <td style={{color:cum>0?'#60a5fa':cum<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
                         <td>
                           <button onClick={()=>askExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#60a5fa',border:'1.5px solid rgba(37,99,235,0.35)',padding:'5px 14px',borderRadius:7,fontSize:'clamp(14px,1.1vw,16px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}
                             onMouseOver={e=>{if(!llmLoading)e.currentTarget.style.background='rgba(37,99,235,0.22)'}}

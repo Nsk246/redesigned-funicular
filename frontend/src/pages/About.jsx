@@ -151,7 +151,8 @@ export default function About() {
     spo2:  scoreVital('spo2',  demoVitals.spo2),
     temp:  scoreVital('temp',  demoVitals.temp),
   }
-  const totalScore = Object.values(vitalScores).reduce((a,b)=>a+b, 0)
+  const riskModifier = (demoVitals.age > 70 ? 1 : 0) + (demoVitals.conditions >= 2 ? 1 : 0)
+  const totalScore = Object.values(vitalScores).reduce((a,b)=>a+b, 0) + riskModifier
   const mappedState = totalScore === 0 ? 0 : totalScore <= 2 ? 1 : totalScore <= 5 ? 2 : totalScore <= 8 ? 3 : 4
 
   return (
@@ -198,7 +199,7 @@ export default function About() {
                   <div style={{ marginTop:6, background:'#0a1628', borderRadius:3, height:3 }}>
                     <div style={{ width:`${(score/4)*100}%`, height:'100%', background:scoreColor, borderRadius:3, transition:'width 0.3s' }}/>
                   </div>
-                  <div style={{ color:scoreColor, fontSize:'clamp(12px,0.9vw,13px)', marginTop:3, fontWeight:600 }}>Score: {score}/4</div>
+                  <div style={{ color:scoreColor, fontSize:'clamp(12px,0.9vw,13px)', marginTop:3, fontWeight:600 }}>Score: {score}/3</div>
                 </div>
               )
             })}

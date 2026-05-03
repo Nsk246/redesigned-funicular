@@ -243,7 +243,7 @@ export default function Phase2() {
                   const probs=TRIAGE_PROBS[`${t.state}-${t.action}`]
                   const prob=probs?probs[t.next_state]:null
                   const isOvr=result.supervisor.override_target===i
-                  const imp=t.next_state<t.state,wor=t.next_state>t.state
+                  const imp=t.next_state<t.state; const wor=t.next_state>t.state
                   return (
                     <div key={i} style={{background:'#060d1a',border:`1.5px solid ${isOvr?'rgba(192,132,252,0.45)':C.cardBorder}`,borderRadius:10,padding:'clamp(12px,1.2vw,16px)'}}>
                       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
@@ -266,7 +266,7 @@ export default function Phase2() {
                           </div>
                           <div style={{textAlign:'right'}}>
                             <div className="t-label" style={{marginBottom:1}}>Reward</div>
-                            <div style={{color:t.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(15px,1.2vw,17px)'}}>{t.reward>0?'+':''}{t.reward.toFixed(1)}</div>
+                            <div style={{color:t.reward>0?'#4ade80':t.reward<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:'clamp(15px,1.2vw,17px)'}}>{t.reward>0?'+':''}{t.reward.toFixed(1)}</div>
                           </div>
                         </div>
                       </div>
@@ -301,7 +301,7 @@ export default function Phase2() {
               </div>
               {episodeDone&&(
                 <div style={{display:'flex',gap:20,textAlign:'right'}}>
-                  <div><div className="t-label" style={{marginBottom:2}}>Supervisor Reward</div><div style={{color:totalRew>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(20px,2vw,26px)',fontWeight:800}}>{totalRew>0?'+':''}{totalRew.toFixed(1)}</div></div>
+                  <div><div className="t-label" style={{marginBottom:2}}>Supervisor Reward</div><div style={{color:totalRew>0?'#4ade80':totalRew<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(20px,2vw,26px)',fontWeight:800}}>{totalRew>0?'+':''}{totalRew.toFixed(1)}</div></div>
                   <div><div className="t-label" style={{marginBottom:2}}>Overrides</div><div style={{color:'#c084fc',fontFamily:'JetBrains Mono,monospace',fontSize:'clamp(20px,2vw,26px)',fontWeight:800}}>{totalOvr}</div></div>
                 </div>
               )}
@@ -359,7 +359,7 @@ export default function Phase2() {
                         {s.triage_agents.map((t,j)=>{
                           const tp=TRIAGE_PROBS[`${t.state}-${t.action}`]
                           const prob=tp?tp[t.next_state]:null
-                          const imp=t.next_state<t.state,wor=t.next_state>t.state
+                          const imp=t.next_state<t.state; const wor=t.next_state>t.state
                           return (
                             <td key={j}>
                               <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'nowrap'}}>
@@ -374,8 +374,8 @@ export default function Phase2() {
                             </td>
                           )
                         })}
-                        <td style={{color:sup.reward>=0?'#4ade80':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{sup.reward>0?'+':''}{sup.reward.toFixed(1)}</td>
-                        <td style={{color:cum>=0?'#60a5fa':'#fb7185',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
+                        <td style={{color:sup.reward>0?'#4ade80':sup.reward<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{sup.reward>0?'+':''}{sup.reward.toFixed(1)}</td>
+                        <td style={{color:cum>0?'#60a5fa':cum<0?'#fb7185':'#4a6080',fontFamily:'JetBrains Mono,monospace',fontWeight:700}}>{cum>0?'+':''}{cum.toFixed(1)}</td>
                         <td><button onClick={()=>askWardExplain(s)} disabled={llmLoading} style={{background:'rgba(37,99,235,0.12)',color:'#93c5fd',border:'1.5px solid rgba(37,99,235,0.35)',padding:'4px 12px',borderRadius:7,fontSize:'clamp(14px,1.1vw,16px)',cursor:'pointer',fontFamily:'Inter,sans-serif',fontWeight:600,opacity:llmLoading?0.4:1,transition:'all 0.15s'}}>{llmLoading?'...':'Ask'}</button></td>
                       </tr>
                     )
