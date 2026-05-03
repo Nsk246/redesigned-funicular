@@ -151,6 +151,7 @@ class TriageAgent:
             self._decay_epsilon()
 
         self.total_reward    += reward
+        self.episode_rewards.append(reward)
         self.last_action      = action
         self.last_transition  = (state, action, next_state, reward)
         self.current_state    = next_state
