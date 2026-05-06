@@ -86,8 +86,6 @@ class SupervisorAgent:
         reward          = compute_ward_reward(ward_state, action, next_ward_state)
 
         self.q_table.update(ward_state, action, reward, next_ward_state, False)
-        self.total_reward       += reward
-        self.episode_rewards.append(reward)
         self.current_ward_state  = next_ward_state
         self.last_transition     = (ward_state, action, next_ward_state, reward)
 

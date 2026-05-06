@@ -164,6 +164,8 @@ def supervisor_step(body: SupervisorStepInput):
         sup_result["next_ward_state"]       = actual_next_ward
         sup_result["next_ward_state_label"] = WARD_LABELS[actual_next_ward]
         sup_result["reward"]                = actual_reward
+        supervisor_agent.total_reward      += actual_reward
+        supervisor_agent.episode_rewards.append(actual_reward)
         sup_result["ward_state_input"]      = states_before
 
         ward_report = ""
