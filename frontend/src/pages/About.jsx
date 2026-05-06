@@ -197,7 +197,7 @@ export default function About() {
                     style={{ background:'transparent', border:'none', outline:'none', color:scoreColor, fontSize:'clamp(16px,1.6vw,22px)', fontFamily:'JetBrains Mono,monospace', fontWeight:700, width:'100%', padding:0 }} />
                   <div style={{ color:'#4a6080', fontSize:'clamp(12px,0.9vw,13px)', marginTop:2 }}>{f.unit}</div>
                   <div style={{ marginTop:6, background:'#0a1628', borderRadius:3, height:3 }}>
-                    <div style={{ width:`${(score/4)*100}%`, height:'100%', background:scoreColor, borderRadius:3, transition:'width 0.3s' }}/>
+                    <div style={{ width:`${(score/3)*100}%`, height:'100%', background:scoreColor, borderRadius:3, transition:'width 0.3s' }}/>
                   </div>
                   <div style={{ color:scoreColor, fontSize:'clamp(12px,0.9vw,13px)', marginTop:3, fontWeight:600 }}>Score: {score}/3</div>
                 </div>

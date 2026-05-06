@@ -105,6 +105,7 @@ class TriageAgent:
         self.batch_size    = batch_size
         self.target_update = target_update
         self.steps         = 0
+        self.step_count    = 0
 
         self.policy_net = DQN(n_states=5, n_actions=4)
         self.target_net = DQN(n_states=5, n_actions=4)
@@ -151,6 +152,7 @@ class TriageAgent:
             self._learn()
             self._decay_epsilon()
 
+        self.step_count      += 1
         self.total_reward    += reward
         self.episode_rewards.append(reward)
         self.last_action      = action

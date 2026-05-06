@@ -205,7 +205,7 @@ def get_metrics():
         "triage": {
             "total_reward": round(triage_agent.total_reward, 2),
             "epsilon": round(triage_agent.epsilon, 3),
-            "steps": triage_agent.steps,
+            "steps": triage_agent.step_count,
             "episode_rewards": list(triage_agent.episode_rewards)[-50:]
         },
         "supervisor": {
