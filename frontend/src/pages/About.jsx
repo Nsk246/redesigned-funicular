@@ -654,9 +654,9 @@ export default function About() {
         {metrics && (
           <div className="grid-2">
             {[
-              { label:'Triage Total Reward',     val: metrics.triage.total_reward,     color:'#60a5fa' },
+              { label:'Triage Session Reward',     val: metrics.triage.total_reward,     color:'#60a5fa' },
               { label:'Triage Steps',             val: metrics.triage.steps,            color:'#60a5fa' },
-              { label:'Supervisor Total Reward',  val: metrics.supervisor.total_reward, color:'#a78bfa' },
+              { label:'Supervisor Session Reward',  val: metrics.supervisor.total_reward, color:'#a78bfa' },
               { label:'Supervisor Overrides',     val: metrics.supervisor.override_count, color:'#a78bfa' },
             ].map(s => (
               <div key={s.label} className="stat-card">
